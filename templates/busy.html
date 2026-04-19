@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统忙碌中 - AI 股票趋势分析系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .busy-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 60px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .busy-icon {
+            font-size: 4em;
+            margin-bottom: 30px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .busy-title {
+            font-size: 2em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .busy-message {
+            font-size: 1.2em;
+            color: #7f8c8d;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #ecf0f1;
+            border-radius: 4px;
+            margin: 30px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 4px;
+            animation: progress 2s ease-in-out infinite;
+        }
+
+        @keyframes progress {
+            0% { width: 0%; }
+            50% { width: 70%; }
+            100% { width: 100%; }
+        }
+
+        .progress-detailed {
+            width: 100%;
+            height: 12px;
+            background: #ecf0f1;
+            border-radius: 6px;
+            margin: 20px 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill-detailed {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 6px;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .status-info {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .status-info p {
+            margin: 5px 0;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        @media (max-width: 768px) {
+            .busy-container {
+                padding: 40px 30px;
+            }
+
+            .busy-title {
+                font-size: 1.8em;
+            }
+
+            .busy-message {
+                font-size: 1.1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="busy-container">
+        <div class="busy-icon">⏳</div>
+        <h1 class="busy-title">正在分析股票数据</h1>
+        <p class="busy-message">系统正在分析股票趋势，请稍等...</p>
+
+        <!-- 详细进度条 -->
+        <div class="progress-detailed">
+            <div class="progress-fill-detailed" id="progress-fill" style="width: 0%">
+                <div class="progress-text" id="progress-text">0%</div>
+            </div>
+        </div>
+
+        <!-- 进度信息 -->
+        <div class="status-info">
+            <p><strong>当前进度：</strong><span id="current-progress">正在初始化...</span></p>
+            <p><strong>当前分析：</strong><span id="current-stock">准备开始</span></p>
+            <p><strong>分析状态：</strong><span id="current-status">获取股票列表中...</span></p>
+            <p><strong>符合条件：</strong><span id="qualified-count">0</span> 只股票</p>
+            <p><strong>预计剩余：</strong><span id="estimated-time">--</span></p>
+        </div>
+
+        <br><br>
+        <a href="/" class="btn">返回首页</a>
+    </div>
+
+    <script>
+        // 获取DOM元素
+        const progressFill = document.getElementById('progress-fill');
+        const progressText = document.getElementById('progress-text');
+        const currentProgress = document.getElementById('current-progress');
+        const currentStock = document.getElementById('current-stock');
+        const currentStatus = document.getElementById('current-status');
+        const qualifiedCount = document.getElementById('qualified-count');
+        const estimatedTime = document.getElementById('estimated-time');
+
+        // 格式化时间
+        function formatTime(seconds) {
+            if (seconds <= 0) return '--';
+            if (seconds < 60) return `${seconds}秒`;
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${minutes}分${remainingSeconds}秒`;
+        }
+
+        // 更新进度显示
+        function updateProgress(data) {
+            // 更新进度条
+            const percentage = data.progress_percentage || 0;
+            progressFill.style.width = `${percentage}%`;
+            progressText.textContent = `${percentage}%`;
+
+            // 更新进度信息
+            currentProgress.textContent = `${data.completed_stocks || 0}/${data.total_stocks || 0}`;
+            currentStock.textContent = data.current_stock || '准备开始';
+            currentStatus.textContent = data.current_status || '初始化中...';
+            qualifiedCount.textContent = data.qualified_count || 0;
+            estimatedTime.textContent = formatTime(data.estimated_remaining_seconds || 0);
+        }
+
+        // 检查状态并更新进度
+        function checkStatus() {
+            fetch('/api/status')
+                .then(response => response.json())
+                .then(data => {
+                    updateProgress(data);
+
+                    if (!data.in_progress) {
+                        // 分析完成，自动跳转到分析结果页面
+                        setTimeout(() => {
+                            window.location.href = '/analyze';
+                        }, 2000); // 2秒后跳转，给用户时间看到完成状态
+                    }
+                })
+                .catch(error => {
+                    console.log('检查状态失败:', error);
+                    currentStatus.textContent = '连接服务器失败，请稍后重试';
+                });
+        }
+
+        // 页面加载后立即检查一次
+        document.addEventListener('DOMContentLoaded', function() {
+            checkStatus();
+            // 每2秒检查一次状态（更频繁的更新）
+            setInterval(checkStatus, 2000);
+        });
+    </script>
+</body>
+</html>
