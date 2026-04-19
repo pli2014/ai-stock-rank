@@ -185,6 +185,154 @@
             padding: 20px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* 表格响应式设计 */
+        @media (max-width: 1024px) {
+            table {
+                font-size: 0.8em;
+            }
+            
+            th, td {
+                padding: 8px;
+            }
+            
+            /* 调整表头宽度 */
+            th[data-sort="code"],
+            td:nth-child(1) {
+                width: 70px !important;
+            }
+            
+            th[data-sort="name"],
+            td:nth-child(2) {
+                width: 120px !important;
+            }
+            
+            th[data-sort="reason"],
+            td:nth-child(9) {
+                width: 150px !important;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .table-container {
+                padding: 10px;
+            }
+            
+            table {
+                font-size: 0.7em;
+            }
+            
+            th, td {
+                padding: 6px;
+            }
+            
+            /* 调整表头宽度 */
+            th[data-sort="code"],
+            td:nth-child(1) {
+                width: 60px !important;
+            }
+            
+            th[data-sort="name"],
+            td:nth-child(2) {
+                width: 100px !important;
+            }
+            
+            th[data-sort="market_cap"],
+            td:nth-child(3) {
+                width: 80px !important;
+            }
+            
+            th[data-sort="avg_volume"],
+            td:nth-child(4) {
+                width: 90px !important;
+            }
+            
+            th[data-sort="trend_summary"],
+            td:nth-child(8) {
+                width: 120px !important;
+            }
+            
+            th[data-sort="reason"],
+            td:nth-child(9) {
+                width: 200px !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            table {
+                font-size: 0.65em;
+            }
+            
+            th, td {
+                padding: 4px;
+            }
+            
+            /* 调整表头宽度 */
+            th[data-sort="code"],
+            td:nth-child(1) {
+                width: 50px !important;
+            }
+            
+            th[data-sort="name"],
+            td:nth-child(2) {
+                width: 90px !important;
+            }
+            
+            th[data-sort="market_cap"],
+            td:nth-child(3) {
+                width: 70px !important;
+            }
+            
+            th[data-sort="avg_volume"],
+            td:nth-child(4) {
+                width: 80px !important;
+            }
+            
+            th[data-sort="price_rise"],
+            td:nth-child(5) {
+                width: 70px !important;
+            }
+            
+            th[data-sort="positive_days"],
+            td:nth-child(6) {
+                width: 80px !important;
+            }
+            
+            th[data-sort="avg_turnover"],
+            td:nth-child(7) {
+                width: 80px !important;
+            }
+            
+            th[data-sort="trend_summary"],
+            td:nth-child(8) {
+                width: 100px !important;
+            }
+            
+            th[data-sort="reason"],
+            td:nth-child(9) {
+                width: 150px !important;
+            }
+        }
+        
+        /* 美化滚动条 */
+        .table-container::-webkit-scrollbar {
+            height: 8px;
+        }
+        
+        .table-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .table-container::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        
+        .table-container::-webkit-scrollbar-thumb:hover {
+            background: #555;
         }
 
         .table-title {
@@ -204,6 +352,67 @@
             padding: 12px;
             text-align: left;
             border-bottom: 1px solid #eee;
+        }
+        
+        /* 表格宽度设置 */
+        table {
+            table-layout: fixed;
+            width: 100%;
+        }
+        
+        /* 表头和数据列宽度设置 */
+        th[data-sort="code"],
+        td:nth-child(1) {
+            width: 80px !important;
+            min-width: 80px !important;
+        }
+        
+        th[data-sort="name"],
+        td:nth-child(2) {
+            width: 150px !important;
+            min-width: 150px !important;
+        }
+        
+        th[data-sort="market_cap"],
+        td:nth-child(3) {
+            width: 100px !important;
+            min-width: 100px !important;
+        }
+        
+        th[data-sort="avg_volume"],
+        td:nth-child(4) {
+            width: 120px !important;
+            min-width: 120px !important;
+        }
+        
+        th[data-sort="price_rise"],
+        td:nth-child(5) {
+            width: 90px !important;
+            min-width: 90px !important;
+        }
+        
+        th[data-sort="positive_days"],
+        td:nth-child(6) {
+            width: 100px !important;
+            min-width: 100px !important;
+        }
+        
+        th[data-sort="avg_turnover"],
+        td:nth-child(7) {
+            width: 100px !important;
+            min-width: 100px !important;
+        }
+        
+        th[data-sort="trend_summary"],
+        td:nth-child(8) {
+            width: 150px !important;
+            min-width: 150px !important;
+        }
+        
+        th[data-sort="reason"],
+        td:nth-child(9) {
+            width: 250px !important;
+            min-width: 250px !important;
         }
 
         th {
@@ -237,33 +446,7 @@
             color: #e74c3c;
         }
 
-        .status-badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.8em;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
 
-        .status-高 {
-            background: #f8d7da;
-            color: #721c24;
-        }
-        
-        .status-中 {
-            background: #f8d7da;
-            color: #721c24;
-        }
-        
-        .status-低 {
-            background: #f8d7da;
-            color: #721c24;
-        }
-        
-        .status-不推荐 {
-            background: #d4edda;
-            color: #155724;
-        }
 
         .price-rise {
             font-weight: bold;
@@ -492,6 +675,29 @@
 
         </div>
         
+        <!-- 数据汇总 -->
+        <div class="summary-container" style="margin-top: 20px; background: rgba(255, 255, 255, 0.95); border-radius: 20px; padding: 20px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);">
+            <h3 style="color: #2c3e50; margin-bottom: 15px;">数据汇总</h3>
+            <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; min-width: 150px;">
+                    <div style="font-size: 1.2em; font-weight: bold; color: #2c3e50;">{{ stocks|length }}</div>
+                    <div style="color: #7f8c8d; font-size: 0.9em;">总股票数量</div>
+                </div>
+                <div style="background: #d4edda; padding: 15px; border-radius: 10px; min-width: 150px;">
+                    <div style="font-size: 1.2em; font-weight: bold; color: #27ae60;">{{ stocks|selectattr('price_rise', '>', 0)|list|length }}</div>
+                    <div style="color: #7f8c8d; font-size: 0.9em;">30日上涨</div>
+                </div>
+                <div style="background: #f8d7da; padding: 15px; border-radius: 10px; min-width: 150px;">
+                    <div style="font-size: 1.2em; font-weight: bold; color: #e74c3c;">{{ stocks|selectattr('price_rise', '<', 0)|list|length }}</div>
+                    <div style="color: #7f8c8d; font-size: 0.9em;">30日下跌</div>
+                </div>
+                <div style="background: #e3f2fd; padding: 15px; border-radius: 10px; min-width: 150px;">
+                    <div style="font-size: 1.2em; font-weight: bold; color: #2980b9;">{{ stocks|selectattr('price_rise', '==', 0)|list|length }}</div>
+                    <div style="color: #7f8c8d; font-size: 0.9em;">30日持平</div>
+                </div>
+            </div>
+        </div>
+        
         <!-- 表格布局 -->
         <div class="table-container">
             <div class="table-title">股票分析结果</div>
@@ -499,7 +705,7 @@
                 <thead>
                     <tr>
                         <th class="sortable" data-sort="code">股票代码</th>
-                        <th class="sortable" data-sort="name">股票名称</th>
+                        <th class="sortable" data-sort="name" style="width: 150px;">股票名称</th>
                         <th class="sortable" data-sort="market_cap">市值(亿元)</th>
                         <th class="sortable" data-sort="avg_volume">平均成交额(万元)</th>
                         <th class="sortable" data-sort="price_rise">30日涨幅</th>
@@ -507,7 +713,6 @@
                         <th class="sortable" data-sort="avg_turnover">平均换手率</th>
                         <th class="sortable" data-sort="trend_summary">价格趋势</th>
                         <th class="sortable" data-sort="reason">详细分析</th>
-                        <th class="sortable" data-sort="status">状态</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -520,10 +725,10 @@
                             data-avg_turnover="{{ stock.avg_turnover }}" 
                             data-positive_days="{{ stock.positive_days }}"
                             data-trend_summary="{{ stock.trend_summary }}"
-                            data-reason="{{ stock.reason }}"
-                            data-status="{{ stock.status }}">
+                            data-reason="{{ stock.reason }}">
                             <td>
-                                <a href="https://www.futunn.com/stock/{{ stock.code }}-{{ 'SZ' if stock.code.startswith('3') or stock.code.startswith('0') else 'SH' }}" target="_blank">
+                                {% set clean_code = stock.code.replace('SH.', '').replace('SZ.', '').replace('sh.', '').replace('sz.', '') %}
+                                <a href="https://www.futunn.com/stock/{{ clean_code }}-{{ 'SZ' if clean_code.startswith('3') or clean_code.startswith('0') else 'SH' }}" target="_blank">
                                     {{ stock.code }}
                                 </a>
                             </td>
@@ -548,9 +753,6 @@
                                 {% endfor %}
                             </td>
                             <td class="reason-text">{{ stock.reason }}</td>
-                            <td>
-                                <span class="status-badge status-{{ stock.status }}">{{ stock.status }}</span>
-                            </td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -646,10 +848,7 @@
                             aValue = a.getAttribute('data-reason');
                             bValue = b.getAttribute('data-reason');
                             break;
-                        case 'status':
-                            aValue = a.getAttribute('data-status');
-                            bValue = b.getAttribute('data-status');
-                            break;
+
                         default:
                             return 0;
                     }

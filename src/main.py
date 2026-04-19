@@ -11,7 +11,7 @@ import threading
 import pandas as pd
 
 # 导入模块化组件 - 使用绝对导入
-from data import get_stock_daily_details
+from data.stock_service import get_stock_daily_details
 from analysis import build_stock_trend, StockTrend
 
 # 创建Flask应用（模板目录相对于src的位置）
@@ -35,18 +35,8 @@ CACHE_DURATION = timedelta(hours=24)
 analysis_lock = threading.Lock()
 analysis_in_progress = False
 
-# 分析进度跟踪
-analysis_progress = {
-    'in_progress': False,
-    'total_stocks': 0,
-    'completed_stocks': 0,
-    'current_stock': '',
-    'current_status': '',
-    'start_time': None,
-    'qualified_count': 0,
-    'failed_count': 0,
-    'last_update': None
-}
+# 分析进度跟踪 - 从单独的模块导入
+from data.analysis_state import analysis_progress
 
 def load_cached_analysis() -> Dict[str, Any]:
     """加载缓存的分析结果"""
@@ -76,7 +66,7 @@ def save_cached_analysis(data: Dict[str, Any]) -> None:
     with open(CACHE_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2, cls=NumpyEncoder)
 
-def perform_analysis(limit: int | None = None, min_market_cap: float = 50.0, max_market_cap: float = 200.0, use_cache: bool = True, max_workers: int = 32) -> List[StockTrend]:
+def perform_analysis(limit: int | None = None, min_market_cap: float = 50.0, max_market_cap: float = 50000.0, use_cache: bool = True, max_workers: int = 32) -> List[StockTrend]:
     """执行股票分析
     
     Args:
@@ -94,6 +84,19 @@ def perform_analysis(limit: int | None = None, min_market_cap: float = 50.0, max
     with analysis_lock:
         analysis_in_progress = True
         try:
+            # 尝试从缓存加载
+            if use_cache:
+                cached = load_cached_analysis()
+                if cached and 'trends' in cached:
+                    trends_data = cached['trends']
+                    trends = []
+                    for item in trends_data:
+                        trend = StockTrend(**item)
+                        trends.append(trend)
+                    return trends
+            
+            # 执行新的分析
+            print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 开始获取股票数据...")
             # 初始化进度跟踪
             analysis_progress.update({
                 'in_progress': True,
@@ -106,32 +109,6 @@ def perform_analysis(limit: int | None = None, min_market_cap: float = 50.0, max
                 'failed_count': 0,
                 'last_update': datetime.now()
             })
-            
-            # 尝试从缓存加载
-            if use_cache:
-                cached = load_cached_analysis()
-                if cached and 'trends' in cached:
-                    trends_data = cached['trends']
-                    trends = []
-                    for item in trends_data:
-                        trend = StockTrend(**item)
-                        trends.append(trend)
-                    
-                    # 更新进度为完成状态
-                    analysis_progress.update({
-                        'in_progress': False,
-                        'total_stocks': len(trends),
-                        'completed_stocks': len(trends),
-                        'current_stock': '分析完成',
-                        'current_status': f'从缓存加载了 {len(trends)} 只股票数据',
-                        'qualified_count': len([t for t in trends if t.status == "推荐"]),
-                        'last_update': datetime.now()
-                    })
-                    
-                    return trends
-            
-            # 执行新的分析
-            print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 开始获取股票数据...")
             analysis_progress['current_status'] = '正在获取股票数据...'
             analysis_progress['last_update'] = datetime.now()
             
@@ -222,9 +199,9 @@ def analyze():
     """分析页面"""
     try:
         limit = request.args.get('limit')
-        limit = int(limit) if limit else 200
+        limit = int(limit) if limit else 10000
         min_market_cap = float(request.args.get('min_market_cap', 50.0))
-        max_market_cap = float(request.args.get('max_market_cap', 5000.0))
+        max_market_cap = float(request.args.get('max_market_cap', 50000.0))
         max_workers = int(request.args.get('max_workers', 32))
         refresh = request.args.get('refresh', 'false').lower() == 'true'
         show_all = request.args.get('show_all', 'true').lower() == 'true'
@@ -260,35 +237,6 @@ def analyze():
             return render_template('busy.html', message="已有分析任务正在进行中，请稍后再试")
         else:
             return render_template('error.html', error=str(e)), 500
-
-@app.route('/api/analysis')
-def api_analysis():
-    """API 接口返回分析结果"""
-    try:
-        limit = request.args.get('limit')
-        limit = int(limit) if limit else 100
-        min_market_cap = float(request.args.get('min_market_cap', 10.0))
-        max_market_cap = float(request.args.get('max_market_cap', 2000.0))
-        max_workers = int(request.args.get('max_workers', 32))
-        refresh = request.args.get('refresh', 'false').lower() == 'true'
-        
-        trends = perform_analysis(limit=limit, min_market_cap=min_market_cap, max_market_cap=max_market_cap, use_cache=not refresh, max_workers=max_workers)
-        qualified_trends = [t for t in trends if t.status == "推荐"]
-        
-        result = {
-            'timestamp': datetime.now().isoformat(),
-            'total_analyzed': len(trends),
-            'qualified_count': len(qualified_trends),
-            'stocks': [trend.__dict__ for trend in qualified_trends]
-        }
-        
-        return jsonify(result)
-    except Exception as e:
-        if "已有分析任务正在进行中" in str(e):
-            return jsonify({'error': '已有分析任务正在进行中，请稍后再试', 'busy': True}), 409
-        else:
-            return jsonify({'error': str(e)}), 500
-
 @app.route('/api/status')
 def api_status():
     """检查分析状态"""

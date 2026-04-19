@@ -6,6 +6,10 @@ import pandas as pd
 from .cache_manager import CacheManager
 from .futu_api import FutuAPI
 
+# 导入分析进度跟踪
+from .analysis_state import analysis_progress
+print("成功导入 analysis_progress 从 analysis_state.py")
+
 
 class StockDataService:
     """股票数据服务"""
@@ -106,21 +110,37 @@ class StockDataService:
                 self.cache_manager.save_cache(code, df)
             return df
     
-    def get_stock_daily_details(self, last_n_days: int = 30, min_market_cap: float = 50.0, max_market_cap: float = 200.0, limit: int = 10) -> pd.DataFrame:
+    def get_stock_daily_details(self, last_n_days: int = 30, min_market_cap: float = 50.0, max_market_cap: float = 20000.0, limit: int = 10) -> pd.DataFrame:
         """获取股票历史日数据明细"""
         # 1. 获取股票列表
         print("\n获取证券基本资料...")
+        analysis_progress.update({
+            'current_status': '正在获取股票列表...',
+            'last_update': datetime.now()
+        })
         stock_list = self._get_stock_list(limit=limit, min_market_cap=min_market_cap)
         columns=['date', 'code', 'name','ipoDate', 'market_cap', 'close', 'volume', 'amount', 'turn']
         
         if stock_list.empty:
             print("未获取到股票列表")
+            analysis_progress.update({
+                'current_status': '未获取到股票列表',
+                'last_update': datetime.now()
+            })
             return pd.DataFrame(columns=columns)
         
         print(f"获取到 {len(stock_list)} 只股票")
+        analysis_progress.update({
+            'current_status': f'获取到 {len(stock_list)} 只股票',
+            'last_update': datetime.now()
+        })
         
         # 2. 筛选总市值满足条件的股票
         print(f"\n筛选总市值在 {min_market_cap} 亿到 {max_market_cap} 亿之间的股票...")
+        analysis_progress.update({
+            'current_status': f'筛选总市值在 {min_market_cap} 亿到 {max_market_cap} 亿之间的股票...',
+            'last_update': datetime.now()
+        })
 
         
         # 获取市值信息
@@ -137,9 +157,20 @@ class StockDataService:
             
             if batch_data is not None and not batch_data.empty:
                 all_market_data.append(batch_data)
+            
+            # 更新进度
+            progress = (i + len(batch_codes)) / len(stock_codes) * 100
+            analysis_progress.update({
+                'current_status': f'获取市值信息: {progress:.1f}%',
+                'last_update': datetime.now()
+            })
         
         if not all_market_data:
             print("未获取到任何市值信息")
+            analysis_progress.update({
+                'current_status': '未获取到任何市值信息',
+                'last_update': datetime.now()
+            })
             return pd.DataFrame(columns=columns)
         
         # 合并所有批次的数据
@@ -169,6 +200,12 @@ class StockDataService:
         filtered_stocks = filtered_stocks.head(limit)
         
         print(f"筛选后返回 {len(filtered_stocks)} 只股票")
+        analysis_progress.update({
+            'total_stocks': len(filtered_stocks),
+            'current_status': f'筛选后返回 {len(filtered_stocks)} 只股票',
+            'last_update': datetime.now()
+        })
+        
         # 打印股票名称、代码和市值
         for _, stock in filtered_stocks.iterrows():
             code = stock['code']
@@ -178,13 +215,23 @@ class StockDataService:
         
         if filtered_stocks.empty:
             print("未筛选到满足条件的股票")
+            analysis_progress.update({
+                'current_status': '未筛选到满足条件的股票',
+                'last_update': datetime.now()
+            })
             return pd.DataFrame(columns=columns)
         
         # 3. 循环遍历获取每只股票的详细信息和历史数据
         print("\n获取股票详细信息和历史数据...")
+        analysis_progress.update({
+            'current_status': '正在获取股票详细信息和历史数据...',
+            'last_update': datetime.now()
+        })
         
         # 存储所有股票的数据
         all_stock_data = []
+        completed_count = 0
+        total_count = len(filtered_stocks)
         
         for _, stock in filtered_stocks.iterrows():
             code = stock['code']
@@ -192,12 +239,26 @@ class StockDataService:
             market_cap = stock['market_cap']
             
             print(f"\n处理股票: {code} {name} (市值: {market_cap:.2f} 亿元)")
+            analysis_progress.update({
+                'current_stock': f"{code} {name}",
+                'completed_stocks': completed_count,
+                'current_status': f'处理股票: {code} {name}',
+                'last_update': datetime.now()
+            })
             
             # 获取股票基本信息
             print(f"  获取股票基本信息...")
+            analysis_progress.update({
+                'current_status': f'获取股票 {code} 基本信息...',
+                'last_update': datetime.now()
+            })
             basic_info = self._get_stock_basic_info(code)
             if basic_info is None:
                 print(f"  获取股票 {code} 基本信息失败")
+                analysis_progress.update({
+                    'current_status': f'获取股票 {code} 基本信息失败',
+                    'last_update': datetime.now()
+                })
                 continue
             
             # 获取上市时间
@@ -206,16 +267,28 @@ class StockDataService:
             
             # 获取股票历史数据
             print(f"  获取股票历史数据...")
+            analysis_progress.update({
+                'current_status': f'获取股票 {code} 历史数据...',
+                'last_update': datetime.now()
+            })
             df_stock = self.get_stock_data(code, last_n=last_n_days)
             
             if df_stock is None or df_stock.empty:
                 print(f"  未获取到股票 {code} 的历史数据")
+                analysis_progress.update({
+                    'current_status': f'未获取到股票 {code} 的历史数据',
+                    'last_update': datetime.now()
+                })
                 continue
             
             print(f"  成功获取 {len(df_stock)} 条历史数据")
             
             # 处理历史数据
             print(f"  处理历史数据...")
+            analysis_progress.update({
+                'current_status': f'处理股票 {code} 历史数据...',
+                'last_update': datetime.now()
+            })
             for _, row in df_stock.iterrows():
                 all_stock_data.append({
                     'date': row['date'].strftime('%Y-%m-%d'),
@@ -230,9 +303,20 @@ class StockDataService:
                 })
             
             print(f"  成功处理 {len(df_stock)} 条数据")
+            completed_count += 1
+            analysis_progress.update({
+                'completed_stocks': completed_count,
+                'current_status': f'已处理 {completed_count}/{total_count} 只股票',
+                'last_update': datetime.now()
+            })
 
         # 4. 生成 pd 数据格式
         print("\n生成股票历史日数据明细...")
+        analysis_progress.update({
+            'current_status': '生成股票历史日数据明细...',
+            'last_update': datetime.now()
+        })
+        
         if all_stock_data:
             # 创建 DataFrame
             df_all = pd.DataFrame(all_stock_data)
@@ -247,9 +331,17 @@ class StockDataService:
                 print(f"股票代码: {code}, 名称: {name}, 记录数: {len(group)}")
             
             print(f"\n成功生成 {len(df_all)} 条股票历史日数据明细")
+            analysis_progress.update({
+                'current_status': f'成功生成 {len(df_all)} 条股票历史日数据明细',
+                'last_update': datetime.now()
+            })
             return df_all
         else:
             print("未获取到任何股票数据")
+            analysis_progress.update({
+                'current_status': '未获取到任何股票数据',
+                'last_update': datetime.now()
+            })
             return pd.DataFrame(columns=['date', 'code', 'ipoDate', 'market_cap', 'close', 'volume', 'amount', 'turn'])
     
     def _get_stock_basic_info(self, code: str, use_cache: bool = True) -> dict | None:
@@ -309,7 +401,7 @@ class StockDataService:
 stock_service = StockDataService()
 
 # 兼容旧接口
-def get_stock_daily_details(last_n_days: int = 30, min_market_cap: float = 50.0, max_market_cap: float = 200.0, limit: int = 10) -> pd.DataFrame:
+def get_stock_daily_details(last_n_days: int = 30, min_market_cap: float = 50.0, max_market_cap: float = 50000, limit: int = 10) -> pd.DataFrame:
     return stock_service.get_stock_daily_details(last_n_days, min_market_cap, max_market_cap, limit)
 
 def close_quote_ctx():

@@ -21,12 +21,12 @@
         .container {
             max-width: 800px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 10px;
         }
 
         .hero {
             text-align: center;
-            padding: 80px 20px;
+            padding: 10px 10px;
             color: white;
         }
 
@@ -38,7 +38,7 @@
 
         .hero p {
             font-size: 1.2em;
-            margin-bottom: 40px;
+            margin-bottom: 10px;
             opacity: 0.9;
         }
 
@@ -81,7 +81,7 @@
 
         .cta-section {
             text-align: center;
-            margin: 60px 0;
+            margin: 10px 0;
         }
 
         .btn {
@@ -240,7 +240,15 @@
     <div class="container">
         <div class="hero">
             <h1>🚀 AI 股票趋势分析系统</h1>
-            <p>基于大数据和人工智能的智能选股分析平台，助您发现市场机会</p>
+            <p>富牛科技</p>
+        </div>
+
+        <div class="cta-section">
+            <a href="/analyze" class="btn" id="analyze-btn">开始分析</a>
+        </div>
+        
+        <div class="button-explanation" style="text-align: center; margin-top: 15px; color: rgba(255, 255, 255, 0.8); font-size: 0.9em;">
+            <p>富途的日交易数据，AI智能模型量化分析</p>
         </div>
 
         <div class="features">
@@ -269,16 +277,6 @@
             </div>
         </div>
 
-        <div class="cta-section">
-            <a href="/analyze" class="btn" id="analyze-btn">开始分析</a>
-            <a href="/analyze?refresh=true" class="btn btn-secondary" id="refresh-btn">刷新数据</a>
-        </div>
-        
-        <div class="button-explanation" style="text-align: center; margin-top: 15px; color: rgba(255, 255, 255, 0.8); font-size: 0.9em;">
-            <p><strong>开始分析</strong>：使用当天缓存数据（如有），快速展示最近30天趋势分析结果</p>
-            <p><strong>刷新数据</strong>：重新获取股票列表并完整分析所有满足条件的股票</p>
-        </div>
-
         <!-- 处理状态提示 -->
         <div id="processing-modal" class="modal" style="display: none;">
             <div class="modal-content">
@@ -305,7 +303,7 @@
         </div>
 
         <div class="footer">
-            <p>© 2026 AI 股票趋势分析系统 | 基于 akshare 数据 | 仅供参考，不构成投资建议</p>
+            <p>© 2026 股市有风险 & 投资需谨慎，不构成投资建议</p>
         </div>
     </div>
 
@@ -403,17 +401,9 @@
                         // 已有分析在进行中
                         showProcessingModal();
                         updateModalProgress(data);
-                        alert('已有分析任务正在进行中，请稍后再试');
                         return;
                     }
-
-                    // 显示处理提示并跳转
-                    showProcessingModal();
-
-                    // 延迟跳转，让用户看到提示
-                    setTimeout(() => {
-                        window.location.href = url;
-                    }, 1000);
+                    window.location.href = url;
                 })
                 .catch(error => {
                     console.log('检查状态失败:', error);

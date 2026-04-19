@@ -173,7 +173,6 @@
             <p><strong>当前进度：</strong><span id="current-progress">正在初始化...</span></p>
             <p><strong>当前分析：</strong><span id="current-stock">准备开始</span></p>
             <p><strong>分析状态：</strong><span id="current-status">获取股票列表中...</span></p>
-            <p><strong>符合条件：</strong><span id="qualified-count">0</span> 只股票</p>
             <p><strong>预计剩余：</strong><span id="estimated-time">--</span></p>
         </div>
 
@@ -188,7 +187,6 @@
         const currentProgress = document.getElementById('current-progress');
         const currentStock = document.getElementById('current-stock');
         const currentStatus = document.getElementById('current-status');
-        const qualifiedCount = document.getElementById('qualified-count');
         const estimatedTime = document.getElementById('estimated-time');
 
         // 格式化时间
@@ -211,7 +209,6 @@
             currentProgress.textContent = `${data.completed_stocks || 0}/${data.total_stocks || 0}`;
             currentStock.textContent = data.current_stock || '准备开始';
             currentStatus.textContent = data.current_status || '初始化中...';
-            qualifiedCount.textContent = data.qualified_count || 0;
             estimatedTime.textContent = formatTime(data.estimated_remaining_seconds || 0);
         }
 
