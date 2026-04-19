@@ -5,879 +5,876 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AI 股票趋势分析报告</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: #333;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-
-        .header h1 {
-            color: #2c3e50;
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-
-        .header p {
-            color: #7f8c8d;
-            font-size: 1.1em;
-        }
-
-        .stats {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin: 20px 0;
-            flex-wrap: wrap;
-        }
-
-        .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            min-width: 120px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .stat-number {
-            font-size: 2em;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .stat-label {
-            font-size: 0.9em;
-            opacity: 0.9;
-        }
-
-        .toggle-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .toggle-btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 20px;
-            background: rgba(255, 255, 255, 0.9);
-            color: #2c3e50;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .toggle-btn.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .signal-guide {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
-
-        .signal-guide h2 {
-            color: #2c3e50;
-            margin-bottom: 20px;
-            font-size: 1.8em;
-        }
-
-        /* 排序选项样式 */
-        .sort-options {
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        .sort-options span {
-            font-weight: bold;
-            color: #2c3e50;
-            float: left;
-            margin-right: 10px;
-            margin-top: 8px;
-        }
-
-        .sort-tabs {
-            overflow: hidden;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            float: left;
-        }
-
-        .sort-tab {
-            padding: 8px 16px;
-            border: none;
-            background: #f5f5f5;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            white-space: nowrap;
-            border-right: 1px solid #ddd;
-            float: left;
-        }
-
-        .sort-tab:last-child {
-            border-right: none;
-        }
-
-        .sort-tab:hover {
-            background: #e0e0e0;
-        }
-
-        .sort-tab.active {
-            background: #4CAF50;
-            color: white;
-        }
-
-        .signal-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border-left: 5px solid #27ae60;
-        }
-
-        .signal-icon {
-            font-size: 1.5em;
-            margin-right: 15px;
-            width: 40px;
-            text-align: center;
-        }
-
-        .table-container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --success-color: #4cc9f0;
+            --danger-color: #f72585;
+            --warning-color: #f8961e;
+            --info-color: #4895ef;
+            --light-bg: #f8f9fa;
+            --dark-text: #212529;
+            --light-text: #6c757d;
+            --border-color: #dee2e6;
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            --hover-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            
+            /* 股票涨跌颜色定义 */
+            --color-up: #27ae60;
+            --color-down: #e74c3c;
         }
         
-        /* 表格响应式设计 */
-        @media (max-width: 1024px) {
-            table {
-                font-size: 0.8em;
-            }
-            
-            th, td {
-                padding: 8px;
-            }
-            
-            /* 调整表头宽度 */
-            th[data-sort="code"],
-            td:nth-child(1) {
-                width: 70px !important;
-            }
-            
-            th[data-sort="name"],
-            td:nth-child(2) {
-                width: 120px !important;
-            }
-            
-            th[data-sort="reason"],
-            td:nth-child(9) {
-                width: 150px !important;
-            }
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+        
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; 
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: var(--dark-text);
+            line-height: 1.6;
+        }
+        
+        .container { 
+            max-width: 1400px; 
+            margin: 0 auto; 
+            padding: 15px; 
+        }
+        
+        .header { 
+            background: white; 
+            border-radius: 16px; 
+            padding: 30px; 
+            margin-bottom: 25px; 
+            box-shadow: var(--card-shadow);
+            text-align: center;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            transform: rotate(30deg);
+        }
+        
+        .header h1 { 
+            font-size: 2.2rem; 
+            margin-bottom: 10px; 
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header p { 
+            font-size: 1.1rem; 
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .stats { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 15px; 
+            margin: 20px 0; 
+        }
+        
+        .stats.horizontal {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-around;
+            flex-wrap: nowrap;
+            gap: 10px;
         }
         
         @media (max-width: 768px) {
-            .table-container {
-                padding: 10px;
+            .stats.horizontal {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                justify-content: flex-start;
+                padding-bottom: 5px; /* 为滚动条留出空间 */
             }
             
-            table {
-                font-size: 0.7em;
+            .stat-card {
+                min-width: 110px;
+                padding: 15px 10px;
+                flex: 1 0 auto;
+                margin: 0 5px;
             }
             
-            th, td {
-                padding: 6px;
+            .stat-number {
+                font-size: 1.1rem;
             }
             
-            /* 调整表头宽度 */
-            th[data-sort="code"],
-            td:nth-child(1) {
-                width: 60px !important;
-            }
-            
-            th[data-sort="name"],
-            td:nth-child(2) {
-                width: 100px !important;
-            }
-            
-            th[data-sort="market_cap"],
-            td:nth-child(3) {
-                width: 80px !important;
-            }
-            
-            th[data-sort="avg_volume"],
-            td:nth-child(4) {
-                width: 90px !important;
-            }
-            
-            th[data-sort="trend_summary"],
-            td:nth-child(8) {
-                width: 120px !important;
-            }
-            
-            th[data-sort="reason"],
-            td:nth-child(9) {
-                width: 200px !important;
+            .stat-label {
+                font-size: 0.65rem;
             }
         }
         
         @media (max-width: 480px) {
-            table {
-                font-size: 0.65em;
+            .stat-card {
+                min-width: 90px;
+                max-width: 120px;
+                padding: 12px 6px;
+                margin: 0 3px;
             }
             
-            th, td {
-                padding: 4px;
+            .stat-number {
+                font-size: 1rem;
             }
             
-            /* 调整表头宽度 */
-            th[data-sort="code"],
-            td:nth-child(1) {
-                width: 50px !important;
-            }
-            
-            th[data-sort="name"],
-            td:nth-child(2) {
-                width: 90px !important;
-            }
-            
-            th[data-sort="market_cap"],
-            td:nth-child(3) {
-                width: 70px !important;
-            }
-            
-            th[data-sort="avg_volume"],
-            td:nth-child(4) {
-                width: 80px !important;
-            }
-            
-            th[data-sort="price_rise"],
-            td:nth-child(5) {
-                width: 70px !important;
-            }
-            
-            th[data-sort="positive_days"],
-            td:nth-child(6) {
-                width: 80px !important;
-            }
-            
-            th[data-sort="avg_turnover"],
-            td:nth-child(7) {
-                width: 80px !important;
-            }
-            
-            th[data-sort="trend_summary"],
-            td:nth-child(8) {
-                width: 100px !important;
-            }
-            
-            th[data-sort="reason"],
-            td:nth-child(9) {
-                width: 150px !important;
+            .stat-label {
+                font-size: 0.6rem;
             }
         }
         
-        /* 美化滚动条 */
-        .table-container::-webkit-scrollbar {
-            height: 8px;
+        .toggle-buttons { 
+            display: flex; 
+            justify-content: center; 
+            gap: 8px; 
+            margin: 25px 0; 
+            flex-wrap: wrap;
         }
         
-        .table-container::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
+        .toggle-btn { 
+            padding: 12px 24px; 
+            border: 2px solid var(--border-color); 
+            border-radius: 50px; 
+            background: white; 
+            cursor: pointer; 
+            transition: all 0.3s; 
+            font-weight: 500;
+            font-size: 1rem;
         }
         
-        .table-container::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 10px;
+        .toggle-btn:hover {
+            border-color: var(--primary-color);
         }
         
-        .table-container::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-
-        .table-title {
-            font-size: 1.5em;
-            color: #2c3e50;
-            margin-bottom: 20px;
-            font-weight: bold;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.9em;
-        }
-
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
+        .toggle-btn.active { 
+            background: var(--primary-color); 
+            color: white; 
+            border-color: var(--primary-color);
         }
         
-        /* 表格宽度设置 */
-        table {
-            table-layout: fixed;
-            width: 100%;
+        .table-container { 
+            background: white; 
+            border-radius: 16px; 
+            padding: 20px; 
+            box-shadow: var(--card-shadow); 
+            height: 70vh; 
         }
         
-        /* 表头和数据列宽度设置 */
-        th[data-sort="code"],
-        td:nth-child(1) {
-            width: 80px !important;
-            min-width: 80px !important;
+        .vtable-container { 
+            height: calc(100% - 40px); 
+            border-radius: 8px;
+            overflow: hidden;
         }
         
-        th[data-sort="name"],
-        td:nth-child(2) {
-            width: 150px !important;
-            min-width: 150px !important;
+        .table-title { 
+            font-size: 1.4rem; 
+            color: var(--dark-text); 
+            margin-bottom: 15px; 
+            font-weight: 600; 
+            display: flex;
+            align-items: center;
         }
         
-        th[data-sort="market_cap"],
-        td:nth-child(3) {
-            width: 100px !important;
-            min-width: 100px !important;
+        .table-title::before {
+            content: "";
+            display: inline-block;
+            width: 8px;
+            height: 24px;
+            background: var(--primary-color);
+            border-radius: 4px;
+            margin-right: 12px;
         }
         
-        th[data-sort="avg_volume"],
-        td:nth-child(4) {
-            width: 120px !important;
-            min-width: 120px !important;
+        .stock-card { 
+            background: white; 
+            border-radius: 12px; 
+            padding: 20px; 
+            margin-bottom: 16px; 
+            box-shadow: var(--card-shadow); 
+            border-left: 4px solid var(--primary-color); 
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
         
-        th[data-sort="price_rise"],
-        td:nth-child(5) {
-            width: 90px !important;
-            min-width: 90px !important;
+        .stock-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--hover-shadow);
         }
         
-        th[data-sort="positive_days"],
-        td:nth-child(6) {
-            width: 100px !important;
-            min-width: 100px !important;
+        .card-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 12px; 
+            padding-bottom: 10px; 
+            border-bottom: 1px solid var(--border-color); 
         }
         
-        th[data-sort="avg_turnover"],
-        td:nth-child(7) {
-            width: 100px !important;
-            min-width: 100px !important;
+        .card-header h2 { 
+            font-size: 1.2rem; 
+            color: var(--dark-text); 
+            margin: 0; 
         }
         
-        th[data-sort="trend_summary"],
-        td:nth-child(8) {
-            width: 150px !important;
-            min-width: 150px !important;
+        .card-header a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
         }
         
-        th[data-sort="reason"],
-        td:nth-child(9) {
-            width: 250px !important;
-            min-width: 250px !important;
-        }
-
-        th {
-            background: #f8f9fa;
-            font-weight: bold;
-            color: #2c3e50;
-            position: sticky;
-            top: 0;
-            cursor: pointer;
-            user-select: none;
-            transition: background-color 0.2s;
-        }
-
-        th:hover {
-            background: #e9ecef;
-        }
-
-        th.sortable::after {
-            content: " ↕";
-            opacity: 0.5;
-            font-size: 0.8em;
-        }
-
-        th.sort-asc::after {
-            content: " ↑";
-            color: #27ae60;
-        }
-
-        th.sort-desc::after {
-            content: " ↓";
-            color: #e74c3c;
-        }
-
-
-
-        .price-rise {
-            font-weight: bold;
-            color: #e74c3c;
-        }
-
-        .price-rise.negative {
-            color: #27ae60;
-        }
-
-        .turnover-rate {
-            color: #f39c12;
+        .card-header a:hover {
+            color: var(--secondary-color);
         }
         
-        .market-cap {
-            color: #2980b9;
-            font-weight: bold;
-            text-align: right;
+        .compact-row { 
+            display: flex; 
+            justify-content: space-between; 
+            font-size: 0.9rem; 
+            margin: 8px 0; 
+            padding: 4px 0;
         }
         
-        .avg-volume {
-            color: #8e44ad;
-            text-align: right;
+        .compact-row span:first-child { 
+            font-weight: 500; 
+            color: var(--light-text); 
         }
         
-        .price-rise {
-            text-align: right;
+        .compact-row span:last-child {
+            font-weight: 500;
+            color: var(--dark-text);
         }
         
-        .turnover-rate {
-            text-align: right;
+        .compact-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 10px;
         }
         
-        table tbody tr td:nth-child(5),
-        table tbody tr td:nth-child(6) {
-            text-align: right;
-        }
-
-        .reason-text {
-            font-size: 0.85em;
-            color: #666;
-            max-width: 200px;
-            word-wrap: break-word;
-        }
-
-        .no-data {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-        }
-
-        .no-data h3 {
-            margin-bottom: 10px;
-            color: #2c3e50;
-        }
-
-        /* 股票卡片样式 */
-        .stock-card {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .card-header {
+        .grid-item {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
+            padding: 6px 0;
+            border-bottom: 1px dashed var(--border-color);
         }
-
-        .card-header h2 {
-            font-size: 1.3em;
-            color: #2c3e50;
-            margin: 0;
+        
+        .grid-item .label {
+            font-weight: 500;
+            color: var(--light-text);
+            font-size: 0.85rem;
         }
-
-        .card-body {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 10px;
+        
+        .grid-item .value {
+            font-weight: 500;
+            color: var(--dark-text);
+            font-size: 0.9rem;
         }
-
-        .card-row {
-            padding: 8px 0;
-            border-bottom: 1px solid #f0f0f0;
+        
+        .sort-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin: 15px 0;
+            flex-wrap: wrap;
         }
-
-        .card-row:last-child {
-            border-bottom: none;
+        
+        .sort-tab {
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.85rem;
         }
-
-        /* 卡片容器 */
-        .mobile-cards {
-            display: block;
+        
+        .sort-tab:hover {
+            border-color: var(--primary-color);
+            background-color: rgba(var(--primary-color-rgb), 0.05);
         }
-
-        /* 移动端适配 */
+        
+        .sort-tab.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .stock-card.compact {
+            padding: 15px;
+        }
+        
+        .stock-card .card-header {
+            padding-bottom: 8px;
+        }
+        
+        .price-rise { 
+            font-weight: bold; 
+            color: #e74c3c;  /* 上涨用红色 */
+        }
+        
+        .price-rise.negative { 
+            color: #27ae60;  /* 下跌用绿色 */
+        }
+        
+        .turnover-rate { 
+            color: var(--warning-color); 
+        }
+        
+        .market-cap { 
+            color: var(--info-color); 
+            font-weight: bold; 
+        }
+        
+        .avg-volume { 
+            color: #8e44ad; 
+        }
+        
+        .no-data { 
+            text-align: center; 
+            padding: 40px; 
+            color: var(--light-text); 
+        }
+        
+        .loading { 
+            text-align: center; 
+            padding: 40px; 
+            color: var(--light-text); 
+            font-size: 1.2rem; 
+        }
+        
+        .summary-container {
+            background: white; 
+            border-radius: 16px; 
+            padding: 20px; 
+            box-shadow: var(--card-shadow);
+            margin-bottom: 20px;
+        }
+        
+        .card-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
+            gap: 20px; 
+        }
+        
         @media (max-width: 768px) {
-            .container {
-                padding: 10px;
+            .container { 
+                padding: 10px; 
+            }
+            
+            .mobile-cards { 
+                display: block; 
+            }
+            
+            .table-container, 
+            .desktop-cards { 
+                display: none; 
             }
             
             .header {
                 padding: 20px 15px;
-                margin-bottom: 20px;
             }
             
             .header h1 {
-                font-size: 1.8em;
+                font-size: 1.8rem;
             }
             
-            .header p {
-                font-size: 0.9em;
-            }
-            
-            .sort-options {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 8px;
-            }
-            
-            #sort-select {
-                width: 100%;
-            }
-            
-            #sort-direction {
-                width: 100%;
-            }
-            
-            .stats {
-                gap: 15px;
-                margin: 15px 0;
-            }
-            
-            .stat-card {
-                padding: 15px;
-                min-width: 100px;
-            }
-            
-            .stat-number {
-                font-size: 1.5em;
-            }
-            
-            .toggle-buttons {
-                gap: 10px;
-                margin-top: 15px;
-                flex-direction: column;
-                align-items: center;
+            .table-title {
+                font-size: 1.2rem;
             }
             
             .toggle-btn {
-                width: 100%;
-                max-width: 200px;
-                padding: 8px 16px;
-                font-size: 0.9em;
-            }
-            
-            .signal-guide {
-                padding: 20px 15px;
-                margin-bottom: 20px;
-            }
-            
-            .signal-guide h2 {
-                font-size: 1.4em;
-                margin-bottom: 15px;
-            }
-            
-            .stock-card {
-                padding: 15px;
-                margin-bottom: 15px;
-            }
-            
-            .card-header h2 {
-                font-size: 1.2em;
-            }
-            
-            .card-body {
-                grid-template-columns: 1fr;
-                gap: 8px;
-            }
-            
-            .card-row {
-                padding: 6px 0;
-                font-size: 0.9em;
+                padding: 10px 18px;
+                font-size: 0.9rem;
             }
         }
         
-        /* 超小屏幕优化 */
-        @media (max-width: 480px) {
-            .header h1 {
-                font-size: 1.5em;
+        @media (min-width: 769px) {
+            .desktop-cards { 
+                display: block; 
             }
             
-            .stat-number {
-                font-size: 1.3em;
+            .mobile-cards { 
+                display: none; 
             }
-            
-            .stat-label {
-                font-size: 0.8em;
-            }
-            
-            .stock-card {
-                padding: 12px;
-            }
-            
-            .card-header h2 {
-                font-size: 1.1em;
-            }
-            
-            .card-row {
-                font-size: 0.85em;
-            }
+        }
+        
+        /* VTable自定义样式 */
+        .vtable-root {
+            border-radius: 8px !important;
+            overflow: hidden;
+        }
+        
+        .stat-positive {
+            color: #e74c3c; /* 上涨用红色 */
+        }
+        
+        .stat-negative {
+            color: #27ae60; /* 下跌用绿色 */
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>AI 股票趋势分析报告</h1>
-            <p>符合条件的股票列表</p>
-            
-
+            <h1>🚀 股票数据趋势</h1>
+            <p>富牛科技</p>
         </div>
         
-        <!-- 数据汇总 -->
-        <div class="summary-container" style="margin-top: 20px; background: rgba(255, 255, 255, 0.95); border-radius: 20px; padding: 20px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);">
-            <h3 style="color: #2c3e50; margin-bottom: 15px;">数据汇总</h3>
-            <div style="display: flex; flex-wrap: wrap; gap: 20px;">
-                <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; min-width: 150px;">
-                    <div style="font-size: 1.2em; font-weight: bold; color: #2c3e50;">{{ stocks|length }}</div>
-                    <div style="color: #7f8c8d; font-size: 0.9em;">总股票数量</div>
+        <div class="summary-container" id="summaryContainer">
+            <h3 style="color: var(--dark-text); margin-bottom: 15px; font-weight: 600;">数据汇总</h3>
+            <div class="stats horizontal">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalStocks">-</div>
+                    <div class="stat-label">总股票数量</div>
                 </div>
-                <div style="background: #d4edda; padding: 15px; border-radius: 10px; min-width: 150px;">
-                    <div style="font-size: 1.2em; font-weight: bold; color: #27ae60;">{{ stocks|selectattr('price_rise', '>', 0)|list|length }}</div>
-                    <div style="color: #7f8c8d; font-size: 0.9em;">30日上涨</div>
+                <div class="stat-card">
+                    <div class="stat-number stat-positive" id="risingStocks">-</div>
+                    <div class="stat-label">30日上涨</div>
                 </div>
-                <div style="background: #f8d7da; padding: 15px; border-radius: 10px; min-width: 150px;">
-                    <div style="font-size: 1.2em; font-weight: bold; color: #e74c3c;">{{ stocks|selectattr('price_rise', '<', 0)|list|length }}</div>
-                    <div style="color: #7f8c8d; font-size: 0.9em;">30日下跌</div>
-                </div>
-                <div style="background: #e3f2fd; padding: 15px; border-radius: 10px; min-width: 150px;">
-                    <div style="font-size: 1.2em; font-weight: bold; color: #2980b9;">{{ stocks|selectattr('price_rise', '==', 0)|list|length }}</div>
-                    <div style="color: #7f8c8d; font-size: 0.9em;">30日持平</div>
+                <div class="stat-card">
+                    <div class="stat-number stat-negative" id="fallingStocks">-</div>
+                    <div class="stat-label">30日下跌</div>
                 </div>
             </div>
         </div>
         
-        <!-- 表格布局 -->
-        <div class="table-container">
+        <div class="toggle-buttons">
+            <button class="toggle-btn active" style="display:none;" id="tableViewBtn">表格视图</button>
+            <button class="toggle-btn" style="display:none;" id="cardViewBtn">卡片视图</button>
+        </div>
+        
+        <div class="sort-tabs" id="sortTabs">
+            <button class="sort-tab active" data-sort="default" data-order="desc">默认</button>
+            <button class="sort-tab" data-sort="market_cap" data-order="desc">市值 <span class="sort-arrow desc">▼</span></button>
+            <button class="sort-tab" data-sort="avg_volume" data-order="desc">成交额 <span class="sort-arrow desc">▼</span></button>
+            <button class="sort-tab" data-sort="price_rise" data-order="desc">涨幅 <span class="sort-arrow desc">▼</span></button>
+            <button class="sort-tab" data-sort="avg_turnover" data-order="desc">换手率 <span class="sort-arrow desc">▼</span></button>
+        </div>
+        
+        <div class="table-container" id="tableView">
             <div class="table-title">股票分析结果</div>
-            <table>
-                <thead>
-                    <tr>
-                        <th class="sortable" data-sort="code">股票代码</th>
-                        <th class="sortable" data-sort="name" style="width: 150px;">股票名称</th>
-                        <th class="sortable" data-sort="market_cap">市值(亿元)</th>
-                        <th class="sortable" data-sort="avg_volume">平均成交额(万元)</th>
-                        <th class="sortable" data-sort="price_rise">30日涨幅</th>
-                        <th class="sortable" data-sort="positive_days">上涨天数/30</th>
-                        <th class="sortable" data-sort="avg_turnover">平均换手率</th>
-                        <th class="sortable" data-sort="trend_summary">价格趋势</th>
-                        <th class="sortable" data-sort="reason">详细分析</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for stock in stocks %}
-                        <tr data-code="{{ stock.code }}" 
-                            data-name="{{ stock.name }}" 
-                            data-market_cap="{{ stock.market_cap }}" 
-                            data-avg_volume="{{ stock.avg_volume }}" 
-                            data-price_rise="{{ stock.price_rise }}" 
-                            data-avg_turnover="{{ stock.avg_turnover }}" 
-                            data-positive_days="{{ stock.positive_days }}"
-                            data-trend_summary="{{ stock.trend_summary }}"
-                            data-reason="{{ stock.reason }}">
-                            <td>
-                                {% set clean_code = stock.code.replace('SH.', '').replace('SZ.', '').replace('sh.', '').replace('sz.', '') %}
-                                <a href="https://www.futunn.com/stock/{{ clean_code }}-{{ 'SZ' if clean_code.startswith('3') or clean_code.startswith('0') else 'SH' }}" target="_blank">
-                                    {{ stock.code }}
-                                </a>
-                            </td>
-                            <td>{{ stock.name }}</td>
-                            <td class="market-cap">{{ stock.market_cap }}</td>
-                            <td class="avg-volume">{{ stock.avg_volume }}</td>
-                            <td>
-                                <span class="price-rise {{ 'negative' if stock.price_rise < 0 else '' }}">
-                                    {{ "%.2f"|format(stock.price_rise * 100) }}%
-                                </span>
-                            </td>
-                            <td>{{ stock.positive_days }}</td>
-                            <td class="turnover-rate">{{ "%.2f"|format(stock.avg_turnover) }}%</td>
-                            <td>
-                                {% set trends = stock.trend_summary.split(',') %}
-                                {% for trend in trends %}
-                                    {% set parts = trend.split(':') %}
-                                    {% if parts|length == 2 %}
-                                        {% set period = parts[0].replace('d', '日') %}
-                                        {{ period }}:{{ parts[1] }}<br>
-                                    {% endif %}
-                                {% endfor %}
-                            </td>
-                            <td class="reason-text">{{ stock.reason }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="vtable-container" id="vtable-container"></div>
+            <div id="loadingIndicator" class="loading">正在加载数据...</div>
+        </div>
+        
+        <div class="mobile-cards" id="mobileCardView" style="display:none;">
+            <div class="table-title">股票分析结果</div>
+            <div id="mobileCardsContainer"></div>
+        </div>
+        
+        <div class="desktop-cards" id="desktopCardView" style="display:none;">
+            <div class="table-title">股票分析结果</div>
+            <div id="desktopCardsContainer"></div>
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const tableHeaders = document.querySelectorAll('th.sortable');
-            const tableBody = document.querySelector('table tbody');
-            let currentSort = { column: 'price_rise', direction: 'desc' };
+    <!-- 引入VTable -->
+    <script src="https://unpkg.com/@visactor/vtable/dist/vtable.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/@visactor/vtable/dist/vtable.css" />
 
-            // 为表头添加点击事件
-            tableHeaders.forEach(header => {
-                header.addEventListener('click', function() {
-                    const sortBy = this.getAttribute('data-sort');
+    <script>
+        // 全局变量
+        let stockData = [];
+        let originalStockData = []; // 保存原始数据用于排序
+        let tableInstance = null;
+        let currentView = 'table';  // 'table', 'mobileCard', 'desktopCard'
+        let currentSort = 'default';
+
+        // 根据排序类型对数据进行排序
+        function sortStockData(sortType) {
+            let sortedData = [...originalStockData]; // 创建副本进行排序
+            
+            switch(sortType) {
+                case 'market_cap_desc':
+                    sortedData.sort((a, b) => b.market_cap - a.market_cap);
+                    break;
+                case 'market_cap_asc':
+                    sortedData.sort((a, b) => a.market_cap - b.market_cap);
+                    break;
+                case 'avg_volume_desc':
+                    sortedData.sort((a, b) => b.avg_volume - a.avg_volume);
+                    break;
+                case 'avg_volume_asc':
+                    sortedData.sort((a, b) => a.avg_volume - b.avg_volume);
+                    break;
+                case 'price_rise_desc':
+                    sortedData.sort((a, b) => b.price_rise - a.price_rise);
+                    break;
+                case 'price_rise_asc':
+                    sortedData.sort((a, b) => a.price_rise - b.price_rise);
+                    break;
+                case 'avg_turnover_desc':
+                    sortedData.sort((a, b) => b.avg_turnover - a.avg_turnover);
+                    break;
+                case 'avg_turnover_asc':
+                    sortedData.sort((a, b) => a.avg_turnover - b.avg_turnover);
+                    break;
+                case 'default':
+                default:
+                    // 保持原始顺序
+                    break;
+            }
+            
+            stockData = sortedData;
+        }
+
+        // AJAX获取数据
+        async function fetchData() {
+            try {
+                const response = await fetch('/api/analyze?limit=4000&show_all=true'); // 获取全部数据，包括推荐和不推荐的
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const result = await response.json();
+                originalStockData = result.stocks || []; // 保存原始数据
+                stockData = [...originalStockData]; // 初始化当前数据
+                
+                // 更新统计数据
+                updateSummaryStats();
+                
+                // 根据数据量决定是否启用VTable
+                if (stockData.length > 0) {
+                    document.getElementById('loadingIndicator').style.display = 'none';
                     
-                    // 确定排序方向
-                    let sortDirection;
-                    if (currentSort.column === sortBy) {
-                        // 如果点击的是当前排序列，切换方向
-                        sortDirection = currentSort.direction === 'asc' ? 'desc' : 'asc';
-                    } else {
-                        // 否则默认降序
-                        sortDirection = 'desc';
+                    // 初始化当前视图
+                    switchView(currentView);
+                } else {
+                    document.getElementById('loadingIndicator').textContent = '暂无数据';
+                }
+            } catch (error) {
+                console.error('获取数据失败:', error);
+                document.getElementById('loadingIndicator').textContent = '数据加载失败，请稍后重试';
+                document.getElementById('loadingIndicator').style.color = '#e74c3c';
+            }
+        }
+
+        // 更新汇总统计
+        function updateSummaryStats() {
+            const total = stockData.length;
+            const rising = stockData.filter(s => s.price_rise > 0).length;
+            const falling = total - rising;
+
+            document.getElementById('totalStocks').textContent = total;
+            document.getElementById('risingStocks').textContent = rising;
+            document.getElementById('fallingStocks').textContent = falling;
+            
+            // 根据数值更新颜色类
+            const risingElement = document.getElementById('risingStocks');
+            const fallingElement = document.getElementById('fallingStocks');
+            
+            // 移除之前的类
+            risingElement.classList.remove('stat-positive', 'stat-negative');
+            fallingElement.classList.remove('stat-positive', 'stat-negative');
+            
+            // 根据数值添加相应类（上涨数量使用绿色，下跌数量使用红色）
+            if (rising > 0) {
+                risingElement.classList.add('stat-positive');
+            } else {
+                risingElement.classList.add('stat-negative');
+            }
+            
+            if (falling > 0) {
+                fallingElement.classList.add('stat-negative');
+            } else {
+                fallingElement.classList.add('stat-positive');
+            }
+        }
+
+        // 初始化VTable
+        function initVTable() {
+            if (tableInstance) {
+                tableInstance.release();
+            }
+
+            const columns = [
+                {
+                    field: 'code',
+                    title: '股票代码',
+                    width: 'auto',
+                    sort: true,
+                    cellType: 'link',
+                    templateLink: function(record) {
+                        var cleanCode = record.code.replace('SH.', '').replace('SZ.', '').replace('sh.', '').replace('sz.', '');
+                        var exchange = cleanCode.startsWith('3') || cleanCode.startsWith('0') ? 'SZ' : 'SH';
+                        return 'https://www.futunn.com/stock/' + cleanCode + '-' + exchange;
+                    },
+                    target: '_blank'
+                },
+                {
+                    field: 'name',
+                    title: '股票名称',
+                    width: 120,
+                    sort: true
+                },
+                {
+                    field: 'market_cap',
+                    title: '市值(亿)',
+                    width: 100,
+                    sort: true,
+                    style: {
+                        textAlign: 'right',
+                        color: '#4895ef'
+                    }
+                },
+                {
+                    field: 'avg_volume',
+                    title: '成交额(万)',
+                    width: 120,
+                    sort: true,
+                    style: {
+                        textAlign: 'right',
+                        color: '#8e44ad'
+                    }
+                },
+                {
+                    field: 'price_rise',
+                    title: '涨幅',
+                    width: 100,
+                    sort: true,
+                    formatter: function(args) {
+                        var numValue = parseFloat(args.value);
+                        if (!isNaN(numValue)) {
+                            return (numValue * 100).toFixed(2) + '%';
+                        }
+                        return args.value;
+                    },
+                    style: {
+                        textAlign: 'right',
+                        color: function(args) {
+                            var numValue = parseFloat(args.value);
+                            return isNaN(numValue) ? '#000' : (numValue >= 0 ? '#e74c3c' : '#27ae60');  // 红涨绿跌
+                        }
+                    }
+                },
+                {
+                    field: 'positive_days',
+                    title: '上涨天数',
+                    width: 100,
+                    sort: true,
+                    style: {
+                        textAlign: 'right'
+                    }
+                },
+                {
+                    field: 'avg_turnover',
+                    title: '换手率',
+                    width: 100,
+                    sort: true,
+                    formatter: function(args) {
+                        var numValue = parseFloat(args.value);
+                        if (!isNaN(numValue)) {
+                            return numValue.toFixed(2) + '%';
+                        }
+                        return args.value;
+                    },
+                    style: {
+                        textAlign: 'right',
+                        color: '#f8961e'
+                    }
+                },
+                {
+                    field: 'reason',
+                    title: '详细分析',
+                    width: 200,
+                    sort: false
+                }
+            ];
+
+            const option = {
+                container: document.getElementById('vtable-container'),
+                records: stockData,
+                columns: columns,
+                theme: VTable.themes.ARCO,
+                heightMode: 'autoHeight',
+                widthMode: 'adaptive',
+                overscrollBehavior: 'none'
+            };
+
+            tableInstance = new VTable.ListTable(option);
+
+            // 监听排序事件
+            tableInstance.on(VTable.ListTable.EVENT_TYPE.SORT_CLICK, function(args) {
+                console.log('Sorting by:', args.field, args.order);
+            });
+        }
+
+        // 渲染卡片视图
+        function renderCardView(isMobile = false) {
+            const containerId = isMobile ? 'mobileCardsContainer' : 'desktopCardsContainer';
+            const container = document.getElementById(containerId);
+            
+            container.innerHTML = ''; // 清空容器
+            
+            stockData.forEach(stock => {
+                const cleanCode = stock.code.replace('SH.', '').replace('SZ.', '').replace('sh.', '').replace('sz.', '');
+                const exchange = cleanCode.startsWith('3') || cleanCode.startsWith('0') ? 'SZ' : 'SH';
+                const url = `https://www.futunn.com/stock/${cleanCode}-${exchange}`;
+                
+                const priceRiseVal = typeof stock.price_rise === 'number' ? stock.price_rise : parseFloat(stock.price_rise);
+                const isRising = priceRiseVal >= 0;
+                const colorClass = isRising ? 'text-up' : 'text-down';
+                
+                const card = document.createElement('div');
+                card.className = 'stock-card compact';
+                card.innerHTML = `
+                    <div class="card-header">
+                        <h2><a href="${url}" target="_blank">${stock.code} ${stock.name}</a></h2>
+                        <span class="price-rise ${colorClass}">${(priceRiseVal * 100).toFixed(2)}%</span>
+                    </div>
+                    <div class="compact-grid">
+                        <div class="grid-item">
+                            <span class="label">市值:</span>
+                            <span class="value market-cap">${stock.market_cap}</span>
+                        </div>
+                        <div class="grid-item">
+                            <span class="label">成交额:</span>
+                            <span class="value avg-volume">${stock.avg_volume}</span>
+                        </div>
+                        <div class="grid-item">
+                            <span class="label">天数:</span>
+                            <span class="value">${stock.positive_days}/30</span>
+                        </div>
+                        <div class="grid-item">
+                            <span class="label">换手率:</span>
+                            <span class="value turnover-rate">${(typeof stock.avg_turnover === 'number' ? stock.avg_turnover : parseFloat(stock.avg_turnover)).toFixed(2)}%</span>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(card);
+            });
+        }
+
+        // 切换视图
+        function switchView(viewType) {
+            currentView = viewType;
+            
+            // 隐藏所有视图
+            document.getElementById('tableView').style.display = 'none';
+            document.getElementById('mobileCardView').style.display = 'none';
+            document.getElementById('desktopCardView').style.display = 'none';
+            
+            if (viewType === 'table') {
+                // 显示表格视图
+                document.getElementById('tableView').style.display = 'block';
+                
+                // 初始化VTable（如果还没有的话）
+                if (stockData.length > 0) {
+                    initVTable();
+                }
+            } else if (viewType === 'mobileCard') {
+                // 显示移动端卡片视图
+                document.getElementById('mobileCardView').style.display = 'block';
+                renderCardView(true);
+            } else if (viewType === 'desktopCard') {
+                // 显示桌面端卡片视图
+                document.getElementById('desktopCardView').style.display = 'block';
+                renderCardView(false);
+            }
+        }
+
+        // 页面加载完成后获取数据
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取数据
+            fetchData();
+            
+            // 设置排序选项卡事件
+            const sortTabs = document.querySelectorAll('.sort-tab');
+            sortTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const sortField = this.getAttribute('data-sort');
+                    
+                    if (sortField === 'default') {
+                        // 对于默认排序，直接应用并移除其他按钮的活动状态
+                        sortTabs.forEach(t => {
+                            if (t !== this) {
+                                t.classList.remove('active');
+                            }
+                        });
+                        this.classList.add('active');
+                        
+                        // 获取排序类型并应用排序
+                        currentSort = 'default';
+                        sortStockData('default');
+                        
+                        // 重新渲染当前视图
+                        switchView(currentView);
+                        return;
                     }
                     
-                    // 更新当前排序状态
-                    currentSort = { column: sortBy, direction: sortDirection };
+                    // 获取当前排序顺序
+                    let sortOrder = this.getAttribute('data-order') || 'desc';
+                    // 切换排序顺序
+                    sortOrder = sortOrder === 'desc' ? 'asc' : 'desc';
+                    this.setAttribute('data-order', sortOrder);
                     
-                    // 更新表头样式
-                    updateHeaderStyles();
+                    // 更新箭头图标
+                    const arrowSpan = this.querySelector('.sort-arrow');
+                    if (arrowSpan) {
+                        arrowSpan.textContent = sortOrder === 'desc' ? '▼' : '▲';
+                        arrowSpan.className = 'sort-arrow ' + sortOrder;
+                    }
                     
-                    // 执行排序
-                    sortTable(sortBy, sortDirection);
+                    // 移除所有激活状态
+                    sortTabs.forEach(t => t.classList.remove('active'));
+                    // 添加当前激活状态
+                    this.classList.add('active');
+                    
+                    // 组合排序类型（字段_顺序）
+                    const sortType = `${sortField}_${sortOrder}`;
+                    
+                    // 获取排序类型并应用排序
+                    currentSort = sortType;
+                    sortStockData(sortType);
+                    
+                    // 重新渲染当前视图
+                    switchView(currentView);
                 });
             });
-
-            // 更新表头样式
-            function updateHeaderStyles() {
-                tableHeaders.forEach(header => {
-                    const sortBy = header.getAttribute('data-sort');
-                    header.classList.remove('sort-asc', 'sort-desc');
-                    if (sortBy === currentSort.column) {
-                        header.classList.add(currentSort.direction === 'asc' ? 'sort-asc' : 'sort-desc');
-                    }
-                });
-            }
-
-            // 执行表格排序
-            function sortTable(sortBy, sortDirection) {
-                const rows = Array.from(tableBody.querySelectorAll('tr'));
-                
-                rows.sort((a, b) => {
-                    let aValue, bValue;
-                    
-                    // 从数据属性中获取值
-                    switch(sortBy) {
-                        case 'code':
-                            aValue = a.getAttribute('data-code');
-                            bValue = b.getAttribute('data-code');
-                            break;
-                        case 'name':
-                            aValue = a.getAttribute('data-name');
-                            bValue = b.getAttribute('data-name');
-                            break;
-                        case 'market_cap':
-                            aValue = parseFloat(a.getAttribute('data-market_cap')) || 0;
-                            bValue = parseFloat(b.getAttribute('data-market_cap')) || 0;
-                            break;
-                        case 'avg_volume':
-                            aValue = parseFloat(a.getAttribute('data-avg_volume')) || 0;
-                            bValue = parseFloat(b.getAttribute('data-avg_volume')) || 0;
-                            break;
-                        case 'price_rise':
-                            aValue = parseFloat(a.getAttribute('data-price_rise')) || 0;
-                            bValue = parseFloat(b.getAttribute('data-price_rise')) || 0;
-                            break;
-                        case 'avg_turnover':
-                            aValue = parseFloat(a.getAttribute('data-avg_turnover')) || 0;
-                            bValue = parseFloat(b.getAttribute('data-avg_turnover')) || 0;
-                            break;
-                        case 'positive_days':
-                            aValue = parseInt(a.getAttribute('data-positive_days')) || 0;
-                            bValue = parseInt(b.getAttribute('data-positive_days')) || 0;
-                            break;
-                        case 'trend_summary':
-                            aValue = a.getAttribute('data-trend_summary');
-                            bValue = b.getAttribute('data-trend_summary');
-                            break;
-                        case 'reason':
-                            aValue = a.getAttribute('data-reason');
-                            bValue = b.getAttribute('data-reason');
-                            break;
-
-                        default:
-                            return 0;
-                    }
-
-                    // 比较值
-                    if (typeof aValue === 'string' && typeof bValue === 'string') {
-                        // 字符串比较
-                        if (sortDirection === 'asc') {
-                            return aValue.localeCompare(bValue);
-                        } else {
-                            return bValue.localeCompare(aValue);
+            
+            // 监听窗口大小变化，根据屏幕尺寸自动调整视图
+            let resizeTimeout;
+            window.addEventListener('resize', function() {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(function() {
+                    if (window.innerWidth <= 768) {
+                        // 移动设备上显示卡片视图
+                        if (currentView !== 'mobileCard') {
+                            switchView('mobileCard');
                         }
                     } else {
-                        // 数值比较
-                        if (sortDirection === 'asc') {
-                            return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
-                        } else {
-                            return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
+                        // PC上显示表格视图
+                        if (currentView !== 'table') {
+                            switchView('table');
                         }
                     }
-                });
-
-                // 重新插入排序后的行
-                rows.forEach(row => tableBody.appendChild(row));
+                }, 200); // 防抖处理
+            });
+            
+            // 根据初始屏幕尺寸设置视图
+            if (window.innerWidth <= 768) {
+                // 移动设备上默认显示卡片视图
+                switchView('mobileCard');
+            } else {
+                // PC上默认显示表格视图
+                switchView('table');
             }
-
-            // 初始排序和样式
-            updateHeaderStyles();
-            sortTable(currentSort.column, currentSort.direction);
         });
     </script>
 </body>

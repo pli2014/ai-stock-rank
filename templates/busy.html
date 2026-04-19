@@ -180,63 +180,12 @@
         <a href="/" class="btn">返回首页</a>
     </div>
 
+    <!-- 移除状态检查逻辑，由全局状态检查统一处理 -->
     <script>
-        // 获取DOM元素
-        const progressFill = document.getElementById('progress-fill');
-        const progressText = document.getElementById('progress-text');
-        const currentProgress = document.getElementById('current-progress');
-        const currentStock = document.getElementById('current-stock');
-        const currentStatus = document.getElementById('current-status');
-        const estimatedTime = document.getElementById('estimated-time');
-
-        // 格式化时间
-        function formatTime(seconds) {
-            if (seconds <= 0) return '--';
-            if (seconds < 60) return `${seconds}秒`;
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = seconds % 60;
-            return `${minutes}分${remainingSeconds}秒`;
-        }
-
-        // 更新进度显示
-        function updateProgress(data) {
-            // 更新进度条
-            const percentage = data.progress_percentage || 0;
-            progressFill.style.width = `${percentage}%`;
-            progressText.textContent = `${percentage}%`;
-
-            // 更新进度信息
-            currentProgress.textContent = `${data.completed_stocks || 0}/${data.total_stocks || 0}`;
-            currentStock.textContent = data.current_stock || '准备开始';
-            currentStatus.textContent = data.current_status || '初始化中...';
-            estimatedTime.textContent = formatTime(data.estimated_remaining_seconds || 0);
-        }
-
-        // 检查状态并更新进度
-        function checkStatus() {
-            fetch('/api/status')
-                .then(response => response.json())
-                .then(data => {
-                    updateProgress(data);
-
-                    if (!data.in_progress) {
-                        // 分析完成，自动跳转到分析结果页面
-                        setTimeout(() => {
-                            window.location.href = '/analyze';
-                        }, 2000); // 2秒后跳转，给用户时间看到完成状态
-                    }
-                })
-                .catch(error => {
-                    console.log('检查状态失败:', error);
-                    currentStatus.textContent = '连接服务器失败，请稍后重试';
-                });
-        }
-
-        // 页面加载后立即检查一次
+        // 页面加载后显示静态加载状态
         document.addEventListener('DOMContentLoaded', function() {
-            checkStatus();
-            // 每2秒检查一次状态（更频繁的更新）
-            setInterval(checkStatus, 2000);
+            // 静态显示加载状态，不进行主动状态检查
+            // 由全局状态检查统一处理跳转逻辑
         });
     </script>
 </body>

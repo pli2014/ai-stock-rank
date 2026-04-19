@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 from .cache_manager import CacheManager
 from .futu_api import FutuAPI
+from .baostock_api import BaoStockAPI
 
 # 导入分析进度跟踪
 from .analysis_state import analysis_progress
@@ -16,10 +17,12 @@ class StockDataService:
     def __init__(self):
         self.cache_manager = CacheManager()
         self.futu_api = FutuAPI()
+        self.bao_api = BaoStockAPI()
     
     def close(self):
         """关闭资源"""
         self.futu_api.close()
+        self.bao_api.close()
     
     def get_stock_data(self, code: str, last_n: int = 30, use_cache: bool = True) -> pd.DataFrame | None:
         """获取股票数据，优先使用缓存，缓存过期则更新"""
@@ -88,7 +91,7 @@ class StockDataService:
             start_date = (last_date + timedelta(days=1)).strftime("%Y-%m-%d")
             
             # 下载新数据
-            df_new = self.futu_api.fetch_stock_daily(code, start_date=start_date)
+            df_new = self.bao_api.fetch_stock_daily(code, start_date=start_date)
             
             if df_new is not None and not df_new.empty:
                 # 合并数据
@@ -105,7 +108,7 @@ class StockDataService:
                 return df_existing
         else:
             # 缓存不存在，下载全部历史数据
-            df = self.futu_api.fetch_stock_daily(code)
+            df = self.bao_api.fetch_stock_daily(code)
             if df is not None:
                 self.cache_manager.save_cache(code, df)
             return df

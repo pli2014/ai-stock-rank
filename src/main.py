@@ -237,6 +237,58 @@ def analyze():
             return render_template('busy.html', message="已有分析任务正在进行中，请稍后再试")
         else:
             return render_template('error.html', error=str(e)), 500
+
+@app.route('/api/analyze')
+def api_analyze():
+    """API接口：返回股票分析数据"""
+    try:
+        limit = request.args.get('limit')
+        limit = int(limit) if limit else 10000
+        min_market_cap = float(request.args.get('min_market_cap', 50.0))
+        max_market_cap = float(request.args.get('max_market_cap', 50000.0))
+        max_workers = int(request.args.get('max_workers', 32))
+        refresh = request.args.get('refresh', 'false').lower() == 'true'
+        # API默认只返回推荐的股票，除非指定 show_all=true
+        show_all = request.args.get('show_all', 'false').lower() == 'true'
+        
+        trends = perform_analysis(limit=limit, min_market_cap=min_market_cap, max_market_cap=max_market_cap, use_cache=not refresh, max_workers=max_workers)
+        
+        if show_all:
+            stocks_to_show = trends
+        else:
+            stocks_to_show = [t for t in trends if t.status == "推荐"]
+        
+        # 默认按30日涨幅倒序排序
+        stocks_to_show.sort(key=lambda x: x.price_rise, reverse=True)
+        
+        # 序列化数据
+        result_stocks = []
+        for stock in stocks_to_show:
+            result_stocks.append({
+                'code': stock.code,
+                'name': stock.name,
+                'market_cap': round(stock.market_cap, 2),
+                'avg_volume': round(stock.avg_volume, 2),
+                'price_rise': stock.price_rise,
+                'status': stock.status,
+                'trend_summary': stock.trend_summary,
+                'reason': stock.reason,
+                'positive_days': stock.positive_days,
+                'avg_turnover': stock.avg_turnover
+            })
+            
+        return jsonify({
+            'stocks': result_stocks,
+            'total': len(result_stocks),
+            'total_analyzed': len(trends),
+            'timestamp': datetime.now().isoformat()
+        })
+    except Exception as e:
+        if "已有分析任务正在进行中" in str(e):
+            return jsonify({'error': '已有分析任务正在进行中，请稍后再试'}), 429
+        else:
+            return jsonify({'error': str(e)}), 500
+
 @app.route('/api/status')
 def api_status():
     """检查分析状态"""
