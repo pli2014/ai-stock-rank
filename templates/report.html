@@ -479,8 +479,8 @@
     <div class="container">
         <div class="header">
             <a href="/" style="position: absolute; top: 5px; left: 5px; color: white; font-size: 1.8rem; text-decoration: none; z-index: 10;">🏠</a>
-            <h1>AI 股票趋势分析报告</h1>
-            <p>选取抗风险：市值>=50亿</p>
+            <h1>富牛科技</h1>
+            <p>选取抗风险股票：市值>=50亿</p>
         </div>
         
         <div class="stats horizontal" id="summaryStats">
@@ -519,11 +519,13 @@
         
         <div class="mobile-cards" id="mobileCardView" style="display:none;">
             <div class="table-title">股票分析结果</div>
+            <div id="mobileLoadingIndicator" class="loading">正在加载数据...</div>
             <div id="mobileCardsContainer"></div>
         </div>
         
         <div class="desktop-cards" id="desktopCardView" style="display:none;">
             <div class="table-title">股票分析结果</div>
+            <div id="desktopLoadingIndicator" class="loading">正在加载数据...</div>
             <div id="desktopCardsContainer"></div>
         </div>
     </div>
@@ -580,6 +582,11 @@
 
         // AJAX获取数据
         async function fetchData() {
+            // 显示所有加载指示器，因为当前视图可能尚未完全确定或切换
+            document.getElementById('loadingIndicator').style.display = 'block';
+            document.getElementById('mobileLoadingIndicator').style.display = 'block';
+            document.getElementById('desktopLoadingIndicator').style.display = 'block';
+            
             try {
                 const response = await fetch('/api/analyze?limit=4000&show_all=true'); // 获取全部数据，包括推荐和不推荐的
                 if (!response.ok) {
@@ -592,19 +599,37 @@
                 // 更新统计数据
                 updateSummaryStats();
                 
-                // 根据数据量决定是否启用VTable
+                // 隐藏所有加载指示器
+                document.getElementById('loadingIndicator').style.display = 'none';
+                document.getElementById('mobileLoadingIndicator').style.display = 'none';
+                document.getElementById('desktopLoadingIndicator').style.display = 'none';
+                
                 if (stockData.length > 0) {
-                    document.getElementById('loadingIndicator').style.display = 'none';
-                    
-                    // 初始化当前视图
+                    // 初始化/刷新当前视图
                     switchView(currentView);
                 } else {
-                    document.getElementById('loadingIndicator').textContent = '暂无数据';
+                    // 如果没有数据，在对应的容器中显示提示
+                    const noDataMsg = '暂无数据';
+                    document.getElementById('loadingIndicator').textContent = noDataMsg;
+                    document.getElementById('mobileLoadingIndicator').textContent = noDataMsg;
+                    document.getElementById('desktopLoadingIndicator').textContent = noDataMsg;
+                    
+                    // 确保加载指示器可见以显示消息
+                    document.getElementById('loadingIndicator').style.display = 'block';
+                    document.getElementById('mobileLoadingIndicator').style.display = 'block';
+                    document.getElementById('desktopLoadingIndicator').style.display = 'block';
                 }
             } catch (error) {
                 console.error('获取数据失败:', error);
-                document.getElementById('loadingIndicator').textContent = '数据加载失败，请稍后重试';
-                document.getElementById('loadingIndicator').style.color = '#e74c3c';
+                const errorMsg = '数据加载失败，请稍后重试';
+                const errorColor = '#e74c3c';
+                
+                ['loadingIndicator', 'mobileLoadingIndicator', 'desktopLoadingIndicator'].forEach(id => {
+                    const el = document.getElementById(id);
+                    el.textContent = errorMsg;
+                    el.style.color = errorColor;
+                    el.style.display = 'block';
+                });
             }
         }
 
@@ -814,6 +839,11 @@
             document.getElementById('mobileCardView').style.display = 'none';
             document.getElementById('desktopCardView').style.display = 'none';
             
+            // 隐藏所有加载指示器
+            document.getElementById('loadingIndicator').style.display = 'none';
+            document.getElementById('mobileLoadingIndicator').style.display = 'none';
+            document.getElementById('desktopLoadingIndicator').style.display = 'none';
+            
             if (viewType === 'table') {
                 // 显示表格视图
                 document.getElementById('tableView').style.display = 'block';
@@ -835,6 +865,21 @@
 
         // 页面加载完成后获取数据
         document.addEventListener('DOMContentLoaded', function() {
+            // 根据初始屏幕尺寸设置视图
+            if (window.innerWidth <= 768) {
+                // 移动设备上显示卡片视图
+                currentView = 'mobileCard';
+                document.getElementById('mobileCardView').style.display = 'block';
+                document.getElementById('desktopLoadingIndicator').style.display = 'none';
+                document.getElementById('loadingIndicator').style.display = 'none';
+            } else {
+                // PC上显示表格视图
+                currentView = 'table';
+                document.getElementById('tableView').style.display = 'block';
+                document.getElementById('mobileLoadingIndicator').style.display = 'none';
+                document.getElementById('desktopLoadingIndicator').style.display = 'none';
+            }
+            
             // 获取数据
             fetchData();
             
@@ -910,15 +955,6 @@
                     }
                 }, 200); // 防抖处理
             });
-            
-            // 根据初始屏幕尺寸设置视图
-            if (window.innerWidth <= 768) {
-                // 移动设备上默认显示卡片视图
-                switchView('mobileCard');
-            } else {
-                // PC上默认显示表格视图
-                switchView('table');
-            }
         });
     </script>
 </body>

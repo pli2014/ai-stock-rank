@@ -22,84 +22,106 @@
             max-width: 800px;
             margin: 0 auto;
             padding: 10px;
+            height: 100vh;  /* 固定为视口高度 */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;  /* 在主轴上两端对齐，使内容和footer分别在顶部和底部 */
         }
 
         .hero {
             text-align: center;
             padding: 10px 10px;
             color: white;
+            margin-bottom: 10px;
         }
 
         .hero h1 {
-            font-size: 3em;
-            margin-bottom: 20px;
+            font-size: 2.5em;
+            margin-bottom: 10px;
             font-weight: 700;
         }
 
         .hero p {
-            font-size: 1.2em;
+            font-size: 1.1em;
             margin-bottom: 10px;
             opacity: 0.9;
         }
 
         .features {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin: 60px 0;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 8px;
+            margin: 8px 0;
+            flex-grow: 1;  /* 让features区域占据中间的剩余空间 */
+            min-height: 0;  /* 防止内容溢出 */
+            justify-content: center; /* 确保网格整体居中 */
         }
 
         .feature-card {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 30px;
-            text-align: center;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border-radius: 16px;
+            padding: 20px 15px;
+            text-align: center; /* 文字居中 */
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;  /* 垂直布局 */
+            align-items: center;     /* 水平居中 */
         }
 
-        .feature-card:hover {
-            transform: translateY(-5px);
+        .feature-header {
+            display: flex;
+            align-items: center;  /* 垂直居中对齐图标和标题 */
+            justify-content: center; /* 内容居中 */
+            margin-bottom: 8px;
         }
 
         .feature-icon {
-            font-size: 3em;
-            margin-bottom: 20px;
+            font-size: 2em;
+            margin-right: 12px;  /* 图标右边距 */
+            flex-shrink: 0;  /* 图标不缩小 */
         }
 
         .feature-card h3 {
             color: #2c3e50;
-            margin-bottom: 15px;
-            font-size: 1.5em;
+            margin: 0;  /* 移除默认边距 */
+            font-size: 1.3em;
         }
 
         .feature-card p {
             color: #7f8c8d;
-            line-height: 1.6;
+            line-height: 1.5;
+            font-size: 0.95em;
+            margin: 0;  /* 移除默认边距 */
+            text-align: center;  /* 描述文字居中 */
+        }
+
+        .feature-card:hover {
+            transform: translateY(-3px);
         }
 
         .cta-section {
             text-align: center;
-            margin: 10px 0;
+            margin: 5px 0 10px;  /* 减少上下边距 */
         }
 
         .btn {
             display: inline-block;
-            padding: 15px 30px;
+            padding: 10px 20px;  /* 减少按钮内边距 */
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             text-decoration: none;
             border-radius: 50px;
-            font-size: 1.1em;
+            font-size: 1em;
             font-weight: 600;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
         }
 
         .btn-secondary {
@@ -108,28 +130,66 @@
             margin-left: 20px;
         }
 
+        .button-explanation {
+            text-align: center;
+            margin: 5px 0;  /* 减少说明文字的边距 */
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.85em;
+        }
+
         .footer {
             text-align: center;
-            padding: 40px 0;
+            padding: 8px 0 5px;
             color: rgba(255, 255, 255, 0.7);
+            font-size: 0.8em;
+            margin-top: auto;  /* 自动移到最底部 */
         }
 
         @media (max-width: 768px) {
+            .container {
+                padding: 8px;
+                min-height: 100vh;  /* 改为min-height以适应内容 */
+            }
+            
             .hero h1 {
-                font-size: 2.5em;
+                font-size: 2.2em;
             }
 
             .features {
                 grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .feature-card {
+                padding: 18px 12px;
+            }
+            
+            .feature-icon {
+                font-size: 2em;
+            }
+            
+            .feature-card h3 {
+                font-size: 1.2em;
+                margin-bottom: 6px;
+            }
+            
+            .feature-card p {
+                font-size: 0.9em;
             }
 
             .btn {
                 display: block;
-                margin: 10px 0;
+                padding: 12px 20px;
+                font-size: 1em;
+                margin: 8px 0;
             }
 
             .btn-secondary {
                 margin-left: 0;
+            }
+            
+            .cta-section {
+                margin: 5px 0;
             }
         }
 
@@ -152,7 +212,7 @@
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             border-radius: 20px;
-            padding: 40px;
+            padding: 30px;
             text-align: center;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
             max-width: 400px;
@@ -161,19 +221,20 @@
 
         .processing-icon {
             font-size: 3em;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             animation: spin 2s linear infinite;
         }
 
         .modal-content h3 {
             color: #2c3e50;
-            margin-bottom: 15px;
-            font-size: 1.5em;
+            margin-bottom: 12px;
+            font-size: 1.4em;
         }
 
         .modal-content p {
             color: #7f8c8d;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
+            font-size: 0.95em;
         }
 
         .modal .progress-bar {
@@ -181,7 +242,7 @@
             height: 8px;
             background: #ecf0f1;
             border-radius: 4px;
-            margin: 20px 0;
+            margin: 18px 0;
             overflow: hidden;
         }
 
@@ -197,7 +258,7 @@
             height: 12px;
             background: #ecf0f1;
             border-radius: 6px;
-            margin: 20px 0;
+            margin: 18px 0;
             overflow: hidden;
             position: relative;
         }
@@ -223,15 +284,15 @@
 
         .progress-info {
             text-align: left;
-            margin-top: 20px;
-            padding: 15px;
+            margin-top: 18px;
+            padding: 12px;
             background: rgba(102, 126, 234, 0.1);
             border-radius: 10px;
-            font-size: 0.9em;
+            font-size: 0.85em;
         }
 
         .progress-info p {
-            margin: 5px 0;
+            margin: 4px 0;
             color: #555;
         }
     </style>
@@ -239,8 +300,8 @@
 <body>
     <div class="container">
         <div class="hero">
-            <h1>🚀 股票数据趋势</h1>
-            <p>富牛科技</p>
+            <h1>🚀 富牛科技</h1>
+            <p></p>
         </div>
 
         <div class="cta-section">
@@ -248,32 +309,40 @@
         </div>
         
         <div class="button-explanation" style="text-align: center; margin-top: 15px; color: rgba(255, 255, 255, 0.8); font-size: 0.9em;">
-            <p>富途的日交易数据，AI智能模型量化分析</p>
+            <p>全球股票数据 | AI智能量化分析</p>
         </div>
 
         <div class="features">
             <div class="feature-card">
-                <div class="feature-icon">📊</div>
-                <h3>强势选股标准</h3>
-                <p>30日涨幅>10%、换手率<20%、上涨天数>10/15/20/25天、市值≥50亿的优质标的</p>
+                <div class="feature-header">
+                    <div class="feature-icon">📊</div>
+                    <h3>选股指标</h3>
+                </div>
+                <p>市值、30日涨幅、平均换手率、上涨天数</p>
             </div>
 
             <div class="feature-card">
-                <div class="feature-icon">🎯</div>
-                <h3>逐步拉升验证</h3>
-                <p>确保股票呈三个阶段稳步上涨趋势，完全符合技术分析要求</p>
+                <div class="feature-header">
+                    <div class="feature-icon">🎯</div>
+                    <h3>快人一步</h3>
+                </div>
+                <p>抓住上涨趋势牛股</p>
             </div>
 
             <div class="feature-card">
-                <div class="feature-icon">⚡</div>
-                <h3>智能并发加速</h3>
-                <p>两阶段分析策略：先限流下载数据到本地缓存，再32线程并发分析，避免API限流，提升速度20-30倍</p>
+                <div class="feature-header">
+                    <div class="feature-icon">💵</div>
+                    <h3>价值策略</h3>
+                </div>
+                <p>数据是原油AI是提炼</p>
             </div>
 
             <div class="feature-card">
-                <div class="feature-icon">🌐</div>
-                <h3>Web 服务</h3>
-                <p>提供便捷的Web界面，支持API调用，随时随地查看分析结果</p>
+                <div class="feature-header">
+                    <div class="feature-icon">🌐</div>
+                    <h3>全球服务</h3>
+                </div>
+                <p>随时随地查看分析结果</p>
             </div>
         </div>
 
@@ -303,7 +372,7 @@
         </div>
 
         <div class="footer">
-            <p>© 2026 股市有风险 & 投资需谨慎，不构成投资建议</p>
+            <p>©2026 股市有风险 & 投资需谨慎</p>
         </div>
     </div>
 
