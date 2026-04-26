@@ -15,7 +15,9 @@ from data.stock_service import get_stock_daily_details
 from analysis import build_stock_trend, StockTrend
 
 # 创建Flask应用（模板目录相对于src的位置）
+print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 正在初始化Flask应用...")
 app = Flask(__name__, template_folder='../templates')
+print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] Flask应用初始化完成")
 
 # 自定义JSON编码器处理numpy类型
 class NumpyEncoder(json.JSONEncoder):
@@ -36,7 +38,9 @@ analysis_lock = threading.Lock()
 analysis_in_progress = False
 
 # 分析进度跟踪 - 从单独的模块导入
+print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 正在导入分析状态模块...")
 from data.analysis_state import analysis_progress
+print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 分析状态模块导入完成")
 
 def load_cached_analysis() -> Dict[str, Any]:
     """加载缓存的分析结果"""
@@ -325,7 +329,16 @@ def api_status():
 
 def main():
     """应用入口点"""
+    print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 应用程序启动中...")
+    print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 正在初始化数据服务...")
+    
+    # 导入并初始化数据服务，这会初始化baostock和futu
+    from data.stock_service import stock_service
+    print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 数据服务初始化完成")
+    
+    print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 正在启动Flask Web服务...")
     app.run(debug=True, host='0.0.0.0', port=80)
+    print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] Flask Web服务已停止")
 
 if __name__ == '__main__':
     main()

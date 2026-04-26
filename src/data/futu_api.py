@@ -5,11 +5,13 @@ from datetime import datetime, timedelta
 import pandas as pd
 import time
 from futu import OpenQuoteContext, Market, SecurityType, KLType, RET_OK
-
+import socket
 
 class FutuAPI:
     """Futu API 封装"""
     def __init__(self, host='127.0.0.1', port=11111, max_qps=120, time_window=60):
+        print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 正在初始化 Futu API...")
+        print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 尝试连接到 Futu OpenD 服务: {host}:{port}")
         self.host = host
         self.port = port
         self.quote_ctx = None
@@ -21,10 +23,24 @@ class FutuAPI:
     
     def _connect(self):
         """建立 API 连接"""
+        print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 正在尝试连接 Futu OpenD 服务...")
         try:
+            # 检查端口是否可达
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(5)  # 设置5秒超时
+            result = sock.connect_ex((self.host, self.port))
+            sock.close()
+            if result != 0:
+                print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 错误: 无法连接到 Futu OpenD 服务 {self.host}:{self.port}")
+                print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 请确认富途牛牛客户端已启动并开启OpenD服务")
+                return
+            
+            print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] Futu OpenD 服务端口 {self.host}:{self.port} 连接正常")
             self.quote_ctx = OpenQuoteContext(host=self.host, port=self.port)
+            print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] Futu API 连接创建成功")
         except Exception as e:
-            print(f"连接 Futu API 失败: {e}")
+            print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 连接 Futu API 失败: {e}")
+            print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 请确认富途牛牛客户端已启动并开启OpenD服务")
             self.quote_ctx = None
     
     def _rate_limit(self):
@@ -74,14 +90,17 @@ class FutuAPI:
     
     def close(self):
         """关闭 API 连接"""
+        print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 正在关闭 Futu API 连接...")
         if self.quote_ctx:
             try:
                 self.quote_ctx.close()
-                print("Quote context closed successfully")
+                print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] Quote context 关闭成功")
             except Exception as e:
-                print(f"关闭连接失败: {e}")
+                print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 关闭连接失败: {e}")
             finally:
                 self.quote_ctx = None
+        else:
+            print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] Futu quote_ctx 未连接，无需关闭")
     
     def code_to_symbol(self, code: str) -> str:
         """将股票代码转换为futu所需的格式"""
@@ -98,10 +117,11 @@ class FutuAPI:
     def fetch_stock_daily(self, code: str, start_date: str | None = None, last_n: int | None = None) -> pd.DataFrame | None:
         """从 futu 获取单只股票的历史数据"""
         if not self.quote_ctx:
-            print("API 连接未建立")
+            print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 错误: Futu API 连接未建立，无法获取股票 {code} 的数据")
             return None
         
         try:
+            print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 正在获取股票 {code} 的历史数据...")
             # 确定日期范围
             end_date = datetime.now()
             if start_date is None:
@@ -126,16 +146,18 @@ class FutuAPI:
             )
             
             if ret != RET_OK:
-                print(f"获取股票 {code} 历史数据失败: {history_data}")
+                print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 获取股票 {code} 历史数据失败: {history_data}")
                 return None
             
             # 处理分页数据
             all_data = []
             if not history_data.empty:
                 all_data.append(history_data)
+                print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 已获取 {len(history_data)} 条数据")
             
             # 处理分页数据
             while page_req_key is not None:
+                print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 正在获取股票 {code} 的分页数据...")
                 # 控制 API 调用频率
                 self._rate_limit()
                 
@@ -150,14 +172,18 @@ class FutuAPI:
                 
                 if ret == RET_OK and not history_data.empty:
                     all_data.append(history_data)
+                    print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 已获取 {len(history_data)} 条分页数据")
                 else:
+                    print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 分页数据获取结束，原因: {history_data if ret != RET_OK else '无更多数据'}")
                     break
             
             if not all_data:
+                print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 股票 {code} 没有获取到任何数据")
                 return None
             
             # 合并所有数据
             df = pd.concat(all_data, ignore_index=True)
+            print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 股票 {code} 总共获取到 {len(df)} 条历史数据")
             
             # 标准化列名和格式
             df = self._normalize_daily_df(df)
@@ -168,7 +194,7 @@ class FutuAPI:
                 
             return df
         except Exception as e:
-            print(f"获取股票数据异常: {e}")
+            print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 获取股票 {code} 数据异常: {e}")
             return None
     
     def _normalize_daily_df(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -199,16 +225,18 @@ class FutuAPI:
         df['date'] = pd.to_datetime(df['date'], errors="coerce")
         df = df.dropna(subset=['date'])
         df = df.sort_values(by='date', ascending=True)
+        df = df.sort_values(by='date', ascending=True)
         
         return df
     
     def get_stock_basic_info(self, code: str) -> dict | None:
         """获取股票基本信息"""
         if not self.quote_ctx:
-            print("API 连接未建立")
+            print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 错误: Futu API 连接未建立，无法获取股票 {code} 的基本信息")
             return None
         
         try:
+            print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 正在获取股票 {code} 的基本信息...")
             # 控制 API 调用频率
             self._rate_limit()
             
@@ -221,7 +249,7 @@ class FutuAPI:
                 # 尝试从深圳证券交易所获取
                 ret, basic_data = self.quote_ctx.get_stock_basicinfo(Market.SZ, SecurityType.STOCK, [self.code_to_symbol(code)])
                 if ret != RET_OK:
-                    print(f"  获取股票 {code} 基本信息失败: {basic_data}")
+                    print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 获取股票 {code} 基本信息失败: {basic_data}")
                     return None
             
             # 提取基本信息
@@ -230,45 +258,50 @@ class FutuAPI:
                 'name': basic_data['name'].iloc[0] if 'name' in basic_data.columns else '',
                 'listing_date': basic_data['listing_date'].iloc[0] if 'listing_date' in basic_data.columns else ''
             }
-            
+            print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 股票 {code} 基本信息获取成功: {basic_info['name']}")
             return basic_info
         except Exception as e:
-            print(f"获取股票基本信息异常: {e}")
+            print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 获取股票 {code} 基本信息异常: {e}")
             return None
     
     def get_stock_list(self) -> pd.DataFrame:
         """获取A股股票列表"""
         if not self.quote_ctx:
-            print("API 连接未建立")
+            print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 错误: Futu API 连接未建立，无法获取股票列表")
             return pd.DataFrame(columns=['code', 'name'])
         
         try:
-            print("尝试获取实时股票列表...")
+            print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 正在获取实时股票列表...")
             # 控制 API 调用频率
             self._rate_limit()
             
             # 获取上海证券交易所股票列表
+            print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 正在获取上海市场股票列表...")
             ret, sh_data = self.quote_ctx.get_stock_basicinfo(Market.SH, SecurityType.STOCK)
             
             # 控制 API 调用频率
             self._rate_limit()
             
             # 获取深圳证券交易所股票列表
+            print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 正在获取深圳市场股票列表...")
             ret_sz, sz_data = self.quote_ctx.get_stock_basicinfo(Market.SZ, SecurityType.STOCK)
             
             # 合并数据
             if ret == RET_OK and ret_sz == RET_OK:
                 df = pd.concat([sh_data, sz_data], ignore_index=True)
+                print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 成功获取上海和深圳市场股票列表，总共 {len(df)} 条记录")
             elif ret == RET_OK:
                 df = sh_data
+                print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 成功获取上海市场股票列表，共 {len(df)} 条记录")
             elif ret_sz == RET_OK:
                 df = sz_data
+                print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 成功获取深圳市场股票列表，共 {len(df)} 条记录")
             else:
-                print(f"获取股票列表失败: 上海({sh_data}), 深圳({sz_data})")
+                print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 获取股票列表失败: 上海({sh_data}), 深圳({sz_data})")
                 return pd.DataFrame(columns=['code', 'name'])
             
             if df.empty:
-                print("获取股票列表失败: 空数据")
+                print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 获取股票列表失败: 空数据")
                 return pd.DataFrame(columns=['code', 'name'])
             
             # 重命名列
@@ -291,30 +324,34 @@ class FutuAPI:
             # 移除ST股票（如果name列包含'ST'）
             if 'name' in df.columns:
                 df = df[~df['name'].str.contains('ST', na=False)]
+                print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 已过滤ST股票，剩余 {len(df)} 只股票")
             
             # 按代码排序
             df = df.sort_values('code', ascending=True)
 
+            print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 最终获得 {len(df)} 只非ST股票")
             return df
         except Exception as e:
-            print(f"获取股票列表异常: {e}")
+            print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 获取股票列表异常: {e}")
             return pd.DataFrame(columns=['code', 'name'])
     
     def get_market_snapshot(self, symbols: list) -> pd.DataFrame | None:
         """获取市场快照信息"""
         if not self.quote_ctx:
-            print("API 连接未建立")
+            print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 错误: Futu API 连接未建立，无法获取市场快照")
             return None
         
         try:
+            print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 正在获取 {len(symbols)} 只股票的市场快照信息...")
             # 控制 API 调用频率
             self._rate_limit()
             
             ret, data = self.quote_ctx.get_market_snapshot(symbols)
             if ret != RET_OK:
-                print(f"获取市场快照失败: {data}")
+                print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 获取市场快照失败: {data}")
                 return None
+            print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 成功获取 {len(data)} 条市场快照数据")
             return data
         except Exception as e:
-            print(f"获取市场快照异常: {e}")
+            print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 获取市场快照异常: {e}")
             return None
