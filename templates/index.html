@@ -40,7 +40,7 @@
             text-align: center;
             padding: 10px 10px;
             color: white;
-            margin-bottom: 10px;
+            margin-bottom: 0px;
         }
 
         .hero h1 {
@@ -56,26 +56,39 @@
         }
 
         .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
             margin: 8px 0;
-            flex-grow: 1;  /* 让features区域占据中间的剩余空间 */
-            min-height: 0;  /* 防止内容溢出 */
-            justify-content: center; /* 确保网格整体居中 */
+            flex-grow: 1;
+            min-height: 0;
+        }
+
+        .feature-grid {
+            display: grid;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .feature-grid.dual-column {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .feature-grid.single-column {
+            grid-template-columns: 1fr;
         }
 
         .feature-card {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 20px 15px;
-            text-align: center; /* 文字居中 */
-            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            padding: 16px 12px;
+            text-align: center;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
             transition: transform 0.3s ease;
             display: flex;
-            flex-direction: column;  /* 垂直布局 */
-            align-items: center;     /* 水平居中 */
+            flex-direction: column;
+            align-items: center;
         }
 
         .feature-header {
@@ -156,33 +169,38 @@
         @media (max-width: 768px) {
             .container {
                 padding: 8px;
-                min-height: 100vh;  /* 改为min-height以适应内容 */
+                min-height: 100vh;
             }
             
             .hero h1 {
                 font-size: 2.2em;
             }
 
-            .features {
+            .feature-grid.dual-column {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .feature-grid.single-column {
                 grid-template-columns: 1fr;
                 gap: 10px;
             }
 
             .feature-card {
-                padding: 18px 12px;
+                padding: 14px 10px;
             }
             
             .feature-icon {
-                font-size: 2em;
+                font-size: 1.8em;
             }
             
             .feature-card h3 {
-                font-size: 1.2em;
+                font-size: 1.1em;
                 margin-bottom: 6px;
             }
             
             .feature-card p {
-                font-size: 0.9em;
+                font-size: 0.85em;
             }
 
             .btn {
@@ -308,7 +326,10 @@
 <body>
     <div class="container">
         <div class="hero">
-            <h1>🚀 富牛科技</h1>
+            <h1 style="display: flex; align-items: center; gap: 12px; justify-content: center;">
+                <img src="/static/funiu.jpg" alt="富牛科技" style="width: 80px; height: 60px; border-radius: 50%; object-fit: cover;">
+                富牛科技
+            </h1>
             <p></p>
         </div>
 
@@ -321,36 +342,66 @@
         </div>
 
         <div class="features">
-            <div class="feature-card">
-                <div class="feature-header">
-                    <div class="feature-icon">📊</div>
-                    <h3>选股指标</h3>
-                </div>
-                <p>市值、30日涨幅、平均换手率、上涨天数</p>
+            <!-- 原有的4个功能卡片 - 双列布局 -->
+            <div class="feature-grid dual-column">
+                <a href="/analyze" class="feature-card" style="text-decoration: none; color: inherit;">
+                    <div class="feature-header">
+                        <div class="feature-icon">📊</div>
+                        <h3>选股指标</h3>
+                    </div>
+                    <p>市值、30日涨幅、平均换手率、上涨天数</p>
+                </a>
+
+                <a href="/analyze" class="feature-card" style="text-decoration: none; color: inherit;">
+                    <div class="feature-header">
+                        <div class="feature-icon">🎯</div>
+                        <h3>快人一步</h3>
+                    </div>
+                    <p>抓住上涨趋势牛股</p>
+                </a>
+
+                <a href="/analyze" class="feature-card" style="text-decoration: none; color: inherit;">
+                    <div class="feature-header">
+                        <div class="feature-icon">💵</div>
+                        <h3>价值策略</h3>
+                    </div>
+                    <p>数据是原油AI是提炼</p>
+                </a>
+
+                <a href="/analyze" class="feature-card" style="text-decoration: none; color: inherit;">
+                    <div class="feature-header">
+                        <div class="feature-icon">🌐</div>
+                        <h3>全球服务</h3>
+                    </div>
+                    <p>随时随地查看分析结果</p>
+                </a>
             </div>
 
-            <div class="feature-card">
-                <div class="feature-header">
-                    <div class="feature-icon">🎯</div>
-                    <h3>快人一步</h3>
-                </div>
-                <p>抓住上涨趋势牛股</p>
-            </div>
+            <!-- 新增的投资理念和工具卡片 - 单列布局 -->
+            <div class="feature-grid single-column">
+                <a href="https://dyp-kb.netlify.app/" target="_blank" class="feature-card" style="text-decoration: none; color: inherit;">
+                    <div class="feature-header">
+                        <div class="feature-icon">🧠</div>
+                        <h3>段永平投资理念</h3>
+                    </div>
+                    <p>从底层信仰到案例实践，五个层级系统梳理</p>
+                </a>
 
-            <div class="feature-card">
-                <div class="feature-header">
-                    <div class="feature-icon">💵</div>
-                    <h3>价值策略</h3>
-                </div>
-                <p>数据是原油AI是提炼</p>
-            </div>
+                <a href="https://learnbuffett.com/" target="_blank" class="feature-card" style="text-decoration: none; color: inherit;">
+                    <div class="feature-header">
+                        <div class="feature-icon">📜</div>
+                        <h3>巴菲特致股东信</h3>
+                    </div>
+                    <p>70年投资智慧，98封亲笔信件，3,939+条交叉链接</p>
+                </a>
 
-            <div class="feature-card">
-                <div class="feature-header">
-                    <div class="feature-icon">🌐</div>
-                    <h3>全球服务</h3>
-                </div>
-                <p>随时随地查看分析结果</p>
+                <a href="https://52etf.site/" target="_blank" class="feature-card" style="text-decoration: none; color: inherit;">
+                    <div class="feature-header">
+                        <div class="feature-icon">📈</div>
+                        <h3>A股大盘云图</h3>
+                    </div>
+                    <p>快速精准分析趋势</p>
+                </a>
             </div>
         </div>
 
@@ -397,6 +448,9 @@
         const modalCurrentStatus = document.getElementById('modal-current-status');
         const modalQualifiedCount = document.getElementById('modal-qualified-count');
         const modalEstimatedTime = document.getElementById('modal-estimated-time');
+
+        // 全局变量，用于控制是否继续检查状态
+        let shouldCheckStatus = true;
 
         // 格式化时间
         function formatTime(seconds) {
@@ -447,7 +501,8 @@
                                 analyzeBtn.style.opacity = '0.6';
                                 analyzeBtn.textContent = '分析中...';
                             }
-                            // 不再在这里设置定时器，由外部的 checkStatusWithTimeout 统一控制
+                            // 继续检查状态
+                            shouldCheckStatus = true;
                         } else {
                             // 隐藏处理提示
                             hideProcessingModal();
@@ -457,9 +512,12 @@
                                 analyzeBtn.style.opacity = '1';
                                 analyzeBtn.textContent = '开始分析';
                             }
+                            // 分析已完成，停止检查状态
+                            shouldCheckStatus = false;
                         }
                     } else {
                         console.error('API 返回的数据格式不正确:', data);
+                        shouldCheckStatus = false;
                     }
                 })
                 .catch(error => {
@@ -471,6 +529,8 @@
                         analyzeBtn.style.opacity = '1';
                         analyzeBtn.textContent = '开始分析';
                     }
+                    // 出现错误时也停止检查
+                    shouldCheckStatus = false;
                 });
         }
 
@@ -524,8 +584,12 @@
         // 开始检查状态
         function checkStatusWithTimeout() {
             checkAnalysisStatus();
-            // 使用 setTimeout 递归调用，控制 3 秒刷新间隔
-            setTimeout(checkStatusWithTimeout, 3000);
+            // 只有在需要继续检查时才设置下一次定时器
+            if (shouldCheckStatus) {
+                setTimeout(checkStatusWithTimeout, 3000);
+            } else {
+                console.log('分析已完成或出现错误，停止状态检查');
+            }
         }
         
         checkStatusWithTimeout();
