@@ -509,6 +509,7 @@
             <button class="sort-tab" data-sort="avg_volume" data-order="desc">成交额 <span class="sort-arrow desc">▼</span></button>
             <button class="sort-tab" data-sort="price_rise" data-order="desc">涨幅 <span class="sort-arrow desc">▼</span></button>
             <button class="sort-tab" data-sort="avg_turnover" data-order="desc">换手率 <span class="sort-arrow desc">▼</span></button>
+            <button class="sort-tab" data-sort="positive_days" data-order="desc">上涨天数 <span class="sort-arrow desc">▼</span></button>
         </div>
         
         <div class="table-container" id="tableView">
@@ -570,6 +571,12 @@
                     break;
                 case 'avg_turnover_asc':
                     sortedData.sort((a, b) => a.avg_turnover - b.avg_turnover);
+                    break;
+                case 'positive_days_desc':
+                    sortedData.sort((a, b) => b.positive_days - a.positive_days);
+                    break;
+                case 'positive_days_asc':
+                    sortedData.sort((a, b) => a.positive_days - b.positive_days);
                     break;
                 case 'default':
                 default:
