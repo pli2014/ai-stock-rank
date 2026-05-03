@@ -23,6 +23,9 @@ except ImportError:
 
 app = Flask(__name__, template_folder='../templates', static_folder='../src/static')
 
+# 配置基础URL - 从环境变量读取，如果没有则使用默认值
+BASE_URL = os.environ.get('BASE_URL', 'https://12382pk144je1.vicp.fun')
+
 # 配置GZIP压缩
 if Gzip:
     gzip = Gzip(app)
@@ -209,7 +212,7 @@ def perform_analysis(limit: int | None = None, min_market_cap: float = 50.0, max
 @app.route('/')
 def index():
     """主页"""
-    return render_template('index.html')
+    return render_template('index.html', base_url=BASE_URL)
 
 @app.route('/analyze')
 def analyze():
@@ -248,12 +251,13 @@ def analyze():
                              show_all=show_all,
                              generated_at=datetime.now(),
                              total_analyzed=len(trends),
-                             qualified_count=len(qualified_trends))
+                             qualified_count=len(qualified_trends),
+                             base_url=BASE_URL)
     except Exception as e:
         if "已有分析任务正在进行中" in str(e):
-            return render_template('busy.html', message="已有分析任务正在进行中，请稍后再试")
+            return render_template('busy.html', message="已有分析任务正在进行中，请稍后再试", base_url=BASE_URL)
         else:
-            return render_template('error.html', error=str(e)), 500
+            return render_template('error.html', error=str(e), base_url=BASE_URL), 500
 
 @app.route('/api/analyze')
 def api_analyze():
