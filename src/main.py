@@ -1,6 +1,3 @@
-"""
-AI Stock Rank - A股趋势分析系统主应用
-"""
 from flask import Flask, render_template, request, jsonify
 import json
 import os
@@ -24,7 +21,7 @@ except ImportError:
     print("警告: flask-gzip 未安装，将不会启用GZIP压缩")
     Gzip = None
 
-app = Flask(__name__, template_folder='../templates')
+app = Flask(__name__, template_folder='../templates', static_folder='../src/static')
 
 # 配置GZIP压缩
 if Gzip:
