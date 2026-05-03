@@ -45,6 +45,30 @@ class NumpyEncoder(json.JSONEncoder):
 # 配置Flask使用自定义编码器
 app.json_encoder = NumpyEncoder
 
+# 友盟埋点代码上下文处理器
+@app.context_processor
+def inject_analytics():
+    """注入友盟埋点代码到所有模板"""
+    analytics_script = '''
+<script>
+    (function(w, d, s, q, i) {
+    w[q] = w[q] || [];
+    var f = d.getElementsByTagName(s)[0],j = d.createElement(s);
+    j.async = true;
+    j.id = 'beacon-aplus';
+    j.src = 'https://d.alicdn.com/alilog/mlog/aplus/' + i + '.js';
+    f.parentNode.insertBefore(j, f);
+    })(window, document, 'script', 'aplus_queue', '203467608');
+
+    //集成应用的appKey
+    aplus_queue.push({
+        action: 'aplus.setMetaInfo',
+        arguments: ['appKey', '69f721916f259537c7a2328f']
+    });
+</script>
+'''
+    return {'analytics_script': analytics_script}
+
 # 缓存分析结果
 CACHE_FILE = os.path.join('cache', 'analysis_cache.json')
 CACHE_DURATION = timedelta(hours=24)
