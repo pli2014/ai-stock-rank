@@ -45,14 +45,34 @@
 
         .hero h1 {
             font-size: 2.5em;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             font-weight: 700;
+            text-shadow: 
+                0 3px 6px rgba(0,0,0,0.4),
+                0 6px 12px rgba(0,0,0,0.25),
+                0 1px 3px rgba(255,255,255,0.15) inset,
+                0 -1px 2px rgba(255,255,255,0.08) inset;
         }
 
-        .hero p {
+        .hero .subtitle {
+            font-size: 1.3em;
+            margin-bottom: 8px;
+            opacity: 0.95;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            color: #f8f9fa; /* 更亮的白色 */
+        }
+
+        .hero .tagline {
             font-size: 1.1em;
             margin-bottom: 10px;
             opacity: 0.9;
+            font-weight: 500;
+            line-height: 1.4;
+            background: linear-gradient(135deg, #ffffff 0%, #e6e6ff 100%); /* 更亮的渐变 */
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .features {
@@ -79,16 +99,17 @@
         }
 
         .feature-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.98); /* 更亮的背景 */
+            backdrop-filter: blur(12px);
             border-radius: 12px;
             padding: 16px 12px;
             text-align: center;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.15); /* 紫色主题阴影 */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
             display: flex;
             flex-direction: column;
             align-items: center;
+            border: 1px solid rgba(102, 126, 234, 0.1); /* 紫色边框 */
         }
 
         .feature-header {
@@ -105,21 +126,26 @@
         }
 
         .feature-card h3 {
-            color: #2c3e50;
-            margin: 0;  /* 移除默认边距 */
+            color: #4a5568; /* 更柔和的深灰色 */
+            margin: 0;
             font-size: 1.3em;
+            font-weight: 600;
+            line-height: 1.2;
         }
 
         .feature-card p {
-            color: #7f8c8d;
-            line-height: 1.5;
+            color: #718096; /* 更亮的灰色 */
+            line-height: 1.4;
             font-size: 0.95em;
-            margin: 0;  /* 移除默认边距 */
-            text-align: center;  /* 描述文字居中 */
+            margin: 0;
+            text-align: center;
+            font-weight: 400;
         }
 
         .feature-card:hover {
             transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.25); /* 增强紫色阴影 */
+            border-color: rgba(102, 126, 234, 0.3);
         }
 
         .cta-section {
@@ -129,20 +155,22 @@
 
         .btn {
             display: inline-block;
-            padding: 10px 20px;  /* 减少按钮内边距 */
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%); /* 调整渐变方向 */
             color: white;
             text-decoration: none;
             border-radius: 50px;
             font-size: 1em;
             font-weight: 600;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            border: 2px solid transparent;
         }
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            border-color: rgba(255, 255, 255, 0.3);
         }
 
         .btn-secondary {
@@ -161,9 +189,12 @@
         .footer {
             text-align: center;
             padding: 8px 0 5px;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.8em;
-            margin-top: auto;  /* 自动移到最底部 */
+            color: rgba(255, 255, 255, 0.85); /* 更亮的白色 */
+            font-size: 0.85em;
+            margin-top: auto;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
         }
 
         @media (max-width: 768px) {
@@ -312,7 +343,7 @@
             text-align: left;
             margin-top: 18px;
             padding: 12px;
-            background: rgba(102, 126, 234, 0.1);
+            background: rgba(2, 122, 250, 0.1);
             border-radius: 10px;
             font-size: 0.85em;
         }
@@ -330,7 +361,8 @@
                 <img src="/static/funiu.jpg" alt="富牛科技" style="width: 80px; height: 60px; border-radius: 50%; object-fit: cover;">
                 富牛科技
             </h1>
-            <p></p>
+            <p class="subtitle">三步走策略</p>
+            <p class="tagline">量化选股 + AI深度分析 + 人决策交易</p>
         </div>
         <div class="features">
             <!-- 原有的4个功能卡片 - 双列布局 -->
