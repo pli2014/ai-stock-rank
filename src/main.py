@@ -16,7 +16,23 @@ from analysis import build_stock_trend, StockTrend
 
 # 创建Flask应用（模板目录相对于src的位置）
 print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] 正在初始化Flask应用...")
+
+# 导入Flask-Gzip并配置
+try:
+    from flask_gzip import Gzip
+except ImportError:
+    print("警告: flask-gzip 未安装，将不会启用GZIP压缩")
+    Gzip = None
+
 app = Flask(__name__, template_folder='../templates')
+
+# 配置GZIP压缩
+if Gzip:
+    gzip = Gzip(app)
+    print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] GZIP压缩已启用")
+else:
+    print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] GZIP压缩未启用")
+    
 print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] Flask应用初始化完成")
 
 # 自定义JSON编码器处理numpy类型

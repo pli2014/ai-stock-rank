@@ -35,6 +35,7 @@ setup(
         "baostock>=0.9.1",
         "pandas>=1.3.0",
         "numpy>=1.21.0",
+        "flask-gzip>=0.2",
     ],
     extras_require={
         "dev": [
